@@ -35,8 +35,8 @@ public class SideViewPrinter<T extends Comparable<T>> {
 		st.append(root.getColor() == NodeColor.BLACK ? "B" : "R");
 		
 
-		String leftPointer = (root.getRight() != sentinel) ? "├──" : "└──";
-		String rightPointer = "└──";
+		String leftPointer = (root.getRight() != sentinel) ? "├──L:" : "└──L:";
+		String rightPointer = "└──R:";
 		
 		goThroughNodes(st, "", leftPointer, root.getLeft(), root.getRight() != sentinel);
 		goThroughNodes(st, "", rightPointer, root.getRight(), false);
@@ -66,14 +66,14 @@ public class SideViewPrinter<T extends Comparable<T>> {
 			
 			StringBuilder pBuilder = new StringBuilder(padding);
 			if (hasRightSibling) {
-				pBuilder.append("|  ");
+				pBuilder.append("|    ");
 			} else {
-				pBuilder.append("   ");
+				pBuilder.append("     ");
 			}
 			
 			String newPadding = pBuilder.toString();
-			String leftPointer = (node.getRight() != sentinel) ? "├──" : "└──";
-			String rightPointer = "└──";
+			String leftPointer = (node.getRight() != sentinel) ? "├──L:" : "└──L:";
+			String rightPointer = "└──R:";
 			
 			goThroughNodes(stringTree, newPadding, leftPointer, node.getLeft(), node.getRight() != sentinel);
 			goThroughNodes(stringTree, newPadding, rightPointer, node.getRight(), false); 
