@@ -7,7 +7,7 @@ public class App {
 
 	public static void main(String[] args) {
 		RedBlackTree<Integer> rbTree = new RedBlackTree<>();
-		rbTree.insertNodeBU(new RBNode<Integer>(14));
+		rbTree.insertNodeBU(new RBNode<Integer>(11));
 		
 		String s = rbTree.sideViewPrint();
 		System.out.println(s);

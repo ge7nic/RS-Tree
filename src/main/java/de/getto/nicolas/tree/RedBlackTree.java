@@ -26,6 +26,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	public RedBlackTree(RBNode<T> root) {
 		setupSentinel();
 		this.root = root;
+		root.setColor(NodeColor.BLACK);
 		root.setLeft(sentinel);
 		root.setRight(sentinel);
 		root.setParent(sentinel);
@@ -99,7 +100,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 					// Case 3
 					node.getParent().setColor(NodeColor.BLACK);
 					node.getParent().getParent().setColor(NodeColor.RED);
-					rotateRight(node);
+					rotateRight(node.getParent().getParent());
 				}
 			} else {
 				// left Uncle
@@ -119,7 +120,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 					// Case 3
 					node.getParent().setColor(NodeColor.BLACK);
 					node.getParent().getParent().setColor(NodeColor.RED);
-					rotateLeft(node);
+					rotateLeft(node.getParent().getParent());
 				}
 			}
 		}

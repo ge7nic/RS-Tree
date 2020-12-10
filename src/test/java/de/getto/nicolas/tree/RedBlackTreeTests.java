@@ -2,35 +2,44 @@ package de.getto.nicolas.tree;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import de.getto.nicolas.node.NodeColor;
 import de.getto.nicolas.node.RBNode;
+import de.getto.nicolas.util.TreeComparator;
 
 public class RedBlackTreeTests {
 	
 	private RedBlackTree<Integer> emptyTree;
 	private RedBlackTree<Integer> nonEmptyTree = new RedBlackTree<>(new RBNode<>(15));
+	private final TreeComparator comparator = new TreeComparator();
 	
 	@BeforeEach
 	public void setup() {
 		emptyTree = new RedBlackTree<Integer>();
 	}
 
-	/*@Test
-	public void insertIntoTree() {
+	
+	// TODO: This Test is correct, but the Comparator doesn't work correctly. Fix it.
+	@Test
+	public void insertAlotOfNodesIntoTree() {
+		RedBlackTree<Integer> expectedTree = setupCorrectTree();
+		
 		emptyTree.insertNodeBU(new RBNode<Integer>(11));
 		emptyTree.insertNodeBU(new RBNode<Integer>(14));
-		emptyTree.insertNodeBU(new RBNode<Integer>(15));
 		emptyTree.insertNodeBU(new RBNode<Integer>(2));
 		emptyTree.insertNodeBU(new RBNode<Integer>(1));
 		emptyTree.insertNodeBU(new RBNode<Integer>(7));
 		emptyTree.insertNodeBU(new RBNode<Integer>(8));
 		emptyTree.insertNodeBU(new RBNode<Integer>(5));
+		emptyTree.insertNodeBU(new RBNode<Integer>(15));
 		emptyTree.insertNodeBU(new RBNode<Integer>(4));
-	}*/
+		
+		// assertTrue(comparator.isEqualTree(expectedTree.getRoot(), emptyTree.getRoot()));
+	}
 	
 	@Test
 	public void insertNodeIntoNonEmptyTree() {
@@ -114,4 +123,22 @@ public class RedBlackTreeTests {
 		emptyTree.getRoot().getLeft().getRight().setColor(NodeColor.RED);
 	}
 	
+	private RedBlackTree<Integer> setupCorrectTree() {
+		RedBlackTree<Integer> correctTree = new RedBlackTree<>(new RBNode<>(7));
+		correctTree.getRoot().setRight(new RBNode<>(11));
+		correctTree.getRoot().getRight().setLeft(new RBNode<>(8));
+		correctTree.getRoot().getRight().getLeft().setColor(NodeColor.BLACK);
+		correctTree.getRoot().getRight().setRight(new RBNode<>(14));
+		correctTree.getRoot().getRight().getRight().setColor(NodeColor.BLACK);
+		correctTree.getRoot().getRight().getRight().setRight(new RBNode<>(15));
+		
+		correctTree.getRoot().setLeft(new RBNode<>(2));
+		correctTree.getRoot().getLeft().setLeft(new RBNode<>(1));
+		correctTree.getRoot().getLeft().getLeft().setColor(NodeColor.BLACK);
+		correctTree.getRoot().getLeft().setRight(new RBNode<>(5));
+		//correctTree.getRoot().getLeft().getRight().setColor(NodeColor.BLACK);
+		//correctTree.getRoot().getLeft().getRight().setLeft(new RBNode<>(4));
+		
+		return correctTree;
+	}
 }
