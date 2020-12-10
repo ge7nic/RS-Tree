@@ -37,6 +37,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	
 	public void setRoot(RBNode<T> root) {
 		this.root = root;
+		this.root.setParent(sentinel);
 	}
 	
 	public RBNode<T> getSentinel() {
@@ -152,7 +153,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	 * Rotate the Tree to the right. Used for Insert-Fixup.
 	 * @param node The node which the rotation "pivots" around.
 	 */
-	private void rotateRight(RBNode<T> node) {
+	protected void rotateRight(RBNode<T> node) {
 		RBNode<T> y = node.getLeft();
 		node.setLeft(y.getRight());
 		if (y.getRight() != sentinel) {

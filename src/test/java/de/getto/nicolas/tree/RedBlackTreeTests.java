@@ -11,60 +11,107 @@ import de.getto.nicolas.node.RBNode;
 
 public class RedBlackTreeTests {
 	
-	private RedBlackTree<Integer> rbTree;
+	private RedBlackTree<Integer> emptyTree;
+	private RedBlackTree<Integer> nonEmptyTree = new RedBlackTree<>(new RBNode<>(15));
 	
 	@BeforeEach
-	public void setupTree() {
-		rbTree = new RedBlackTree<Integer>();
+	public void setup() {
+		emptyTree = new RedBlackTree<Integer>();
 	}
 
 	/*@Test
 	public void insertIntoTree() {
-		rbTree.insertNodeBU(new RBNode<Integer>(11));
-		rbTree.insertNodeBU(new RBNode<Integer>(14));
-		rbTree.insertNodeBU(new RBNode<Integer>(15));
-		rbTree.insertNodeBU(new RBNode<Integer>(2));
-		rbTree.insertNodeBU(new RBNode<Integer>(1));
-		rbTree.insertNodeBU(new RBNode<Integer>(7));
-		rbTree.insertNodeBU(new RBNode<Integer>(8));
-		rbTree.insertNodeBU(new RBNode<Integer>(5));
-		rbTree.insertNodeBU(new RBNode<Integer>(4));
+		emptyTree.insertNodeBU(new RBNode<Integer>(11));
+		emptyTree.insertNodeBU(new RBNode<Integer>(14));
+		emptyTree.insertNodeBU(new RBNode<Integer>(15));
+		emptyTree.insertNodeBU(new RBNode<Integer>(2));
+		emptyTree.insertNodeBU(new RBNode<Integer>(1));
+		emptyTree.insertNodeBU(new RBNode<Integer>(7));
+		emptyTree.insertNodeBU(new RBNode<Integer>(8));
+		emptyTree.insertNodeBU(new RBNode<Integer>(5));
+		emptyTree.insertNodeBU(new RBNode<Integer>(4));
 	}*/
+	
+	@Test
+	public void insertNodeIntoNonEmptyTree() {
+		nonEmptyTree.insertNodeBU(new RBNode<>(9));
+		nonEmptyTree.insertNodeBU(new RBNode<>(17));
+		
+		assertEquals(15, nonEmptyTree.getRoot().getKey());
+		assertEquals(NodeColor.BLACK, nonEmptyTree.getRoot().getColor());
+		assertEquals(9, nonEmptyTree.getRoot().getLeft().getKey());
+		assertEquals(NodeColor.RED, nonEmptyTree.getRoot().getLeft().getColor());
+		assertEquals(17, nonEmptyTree.getRoot().getRight().getKey());
+		assertEquals(NodeColor.RED, nonEmptyTree.getRoot().getRight().getColor());
+		assertEquals(nonEmptyTree.getSentinel(), nonEmptyTree.getRoot().getLeft().getLeft());
+		assertEquals(nonEmptyTree.getSentinel(), nonEmptyTree.getRoot().getLeft().getRight());
+		assertEquals(nonEmptyTree.getSentinel(), nonEmptyTree.getRoot().getRight().getLeft());
+		assertEquals(nonEmptyTree.getSentinel(), nonEmptyTree.getRoot().getRight().getRight());
+	}
 	
 	@Test
 	public void insertNodeIntoEmpty() {
 		Object[] actualElements = new Object[3];
 		
-		rbTree.insertNodeBU(new RBNode<Integer>(11));
-		Object[] expectedElements = {rbTree.getSentinel(), rbTree.getSentinel(), rbTree.getSentinel()};
-		actualElements[0] = rbTree.getRoot().getParent();
-		actualElements[1] = rbTree.getRoot().getLeft();
-		actualElements[2] = rbTree.getRoot().getRight();
+		emptyTree.insertNodeBU(new RBNode<Integer>(11));
+		Object[] expectedElements = {emptyTree.getSentinel(), emptyTree.getSentinel(), emptyTree.getSentinel()};
+		actualElements[0] = emptyTree.getRoot().getParent();
+		actualElements[1] = emptyTree.getRoot().getLeft();
+		actualElements[2] = emptyTree.getRoot().getRight();
 		
-		assertEquals(11, rbTree.getRoot().getKey());
-		assertEquals(NodeColor.BLACK, rbTree.getRoot().getColor());
+		assertEquals(11, emptyTree.getRoot().getKey());
+		assertEquals(NodeColor.BLACK, emptyTree.getRoot().getColor());
 		assertArrayEquals(expectedElements, actualElements);
 	}
 	
 	@Test
 	public void rotateLeftTest() {
-		// setUpTree();
-		//rbTree.rotateLeft(rbTree.getRoot());
+		setupTreeForLeftRotation();
+		emptyTree.rotateLeft(emptyTree.getRoot());
 		
-		//assertEquals(8, rbTree.getRoot().getKey());
+		assertEquals(8, emptyTree.getRoot().getKey());
+		assertEquals(9, emptyTree.getRoot().getRight().getKey());
+		assertEquals(5, emptyTree.getRoot().getLeft().getKey());
+		assertEquals(2, emptyTree.getRoot().getLeft().getLeft().getKey());
+		assertEquals(7, emptyTree.getRoot().getLeft().getRight().getKey());
 	}
 	
-	private void setUpTree() {
-		rbTree.setRoot(new RBNode<>(5));
-		rbTree.getRoot().setColor(NodeColor.BLACK);
-		rbTree.getRoot().setLeft(new RBNode<>(2));
-		rbTree.getRoot().getLeft().setColor(NodeColor.BLACK);
-		rbTree.getRoot().setRight(new RBNode<>(8));
-		rbTree.getRoot().getRight().setColor(NodeColor.BLACK);
-		rbTree.getRoot().getRight().setLeft(new RBNode<>(7));
-		rbTree.getRoot().getRight().getLeft().setColor(NodeColor.RED);
-		rbTree.getRoot().getRight().setRight(new RBNode<>(9));
-		rbTree.getRoot().getRight().getRight().setColor(NodeColor.RED);
+	@Test
+	public void rotateRightTest() {
+		setupTreeForRightRotation();
+		emptyTree.rotateRight(emptyTree.getRoot());
+		
+		assertEquals(5, emptyTree.getRoot().getKey());
+		assertEquals(2, emptyTree.getRoot().getLeft().getKey());
+		assertEquals(8, emptyTree.getRoot().getRight().getKey());
+		assertEquals(7, emptyTree.getRoot().getRight().getLeft().getKey());
+		assertEquals(9, emptyTree.getRoot().getRight().getRight().getKey());
+	}
+	
+	private void setupTreeForLeftRotation() {
+		emptyTree.setRoot(new RBNode<>(5));
+		emptyTree.getRoot().setColor(NodeColor.BLACK);
+		emptyTree.getRoot().setLeft(new RBNode<>(2));
+		emptyTree.getRoot().getLeft().setColor(NodeColor.BLACK);
+		emptyTree.getRoot().setRight(new RBNode<>(8));
+		emptyTree.getRoot().getRight().setColor(NodeColor.BLACK);
+		emptyTree.getRoot().getRight().setLeft(new RBNode<>(7));
+		emptyTree.getRoot().getRight().getLeft().setColor(NodeColor.RED);
+		emptyTree.getRoot().getRight().setRight(new RBNode<>(9));
+		emptyTree.getRoot().getRight().getRight().setColor(NodeColor.RED);
+	}
+	
+	private void setupTreeForRightRotation() {
+		emptyTree.setRoot(new RBNode<>(8));
+		emptyTree.getRoot().setColor(NodeColor.BLACK);
+		emptyTree.getRoot().setRight(new RBNode<>(9));
+		emptyTree.getRoot().getRight().setColor(NodeColor.RED);
+		emptyTree.getRoot().setLeft(new RBNode<>(5));
+		emptyTree.getRoot().getLeft().setColor(NodeColor.BLACK);
+		emptyTree.getRoot().getLeft().setLeft(new RBNode<>(2));
+		emptyTree.getRoot().getLeft().getLeft().setColor(NodeColor.BLACK);
+		emptyTree.getRoot().getLeft().setRight(new RBNode<>(7));
+		emptyTree.getRoot().getLeft().getRight().setColor(NodeColor.RED);
 	}
 	
 }
