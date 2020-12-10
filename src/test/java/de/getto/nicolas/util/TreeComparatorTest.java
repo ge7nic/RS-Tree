@@ -21,7 +21,8 @@ public class TreeComparatorTest {
 	
 	@Test
 	public void testEmptyTrees() {
-		assertTrue(treeC.isEqualTree(intTreeOne.getRoot(), intTreeTwo.getRoot()));
+		assertTrue(treeC.isEqualTree(intTreeOne.getRoot(), intTreeTwo.getRoot(),
+				intTreeOne.getSentinel(), intTreeTwo.getSentinel()));
 	}
 	
 	@Test

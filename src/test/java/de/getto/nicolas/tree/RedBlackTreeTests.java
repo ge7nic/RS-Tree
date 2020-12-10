@@ -38,7 +38,8 @@ public class RedBlackTreeTests {
 		emptyTree.insertNodeBU(new RBNode<Integer>(15));
 		emptyTree.insertNodeBU(new RBNode<Integer>(4));
 		
-		// assertTrue(comparator.isEqualTree(expectedTree.getRoot(), emptyTree.getRoot()));
+		assertTrue(comparator.isEqualTree(expectedTree.getRoot(), emptyTree.getRoot(),
+				expectedTree.getSentinel(), emptyTree.getSentinel()));
 	}
 	
 	@Test
@@ -127,17 +128,27 @@ public class RedBlackTreeTests {
 		RedBlackTree<Integer> correctTree = new RedBlackTree<>(new RBNode<>(7));
 		correctTree.getRoot().setRight(new RBNode<>(11));
 		correctTree.getRoot().getRight().setLeft(new RBNode<>(8));
+		correctTree.getRoot().getRight().getLeft().setLeft(correctTree.getSentinel());
+		correctTree.getRoot().getRight().getLeft().setRight(correctTree.getSentinel());
 		correctTree.getRoot().getRight().getLeft().setColor(NodeColor.BLACK);
 		correctTree.getRoot().getRight().setRight(new RBNode<>(14));
+		correctTree.getRoot().getRight().getRight().setLeft(correctTree.getSentinel());
 		correctTree.getRoot().getRight().getRight().setColor(NodeColor.BLACK);
 		correctTree.getRoot().getRight().getRight().setRight(new RBNode<>(15));
+		correctTree.getRoot().getRight().getRight().getRight().setLeft(correctTree.getSentinel());
+		correctTree.getRoot().getRight().getRight().getRight().setRight(correctTree.getSentinel());
 		
 		correctTree.getRoot().setLeft(new RBNode<>(2));
 		correctTree.getRoot().getLeft().setLeft(new RBNode<>(1));
+		correctTree.getRoot().getLeft().getLeft().setLeft(correctTree.getSentinel());
+		correctTree.getRoot().getLeft().getLeft().setRight(correctTree.getSentinel());
 		correctTree.getRoot().getLeft().getLeft().setColor(NodeColor.BLACK);
 		correctTree.getRoot().getLeft().setRight(new RBNode<>(5));
-		//correctTree.getRoot().getLeft().getRight().setColor(NodeColor.BLACK);
-		//correctTree.getRoot().getLeft().getRight().setLeft(new RBNode<>(4));
+		correctTree.getRoot().getLeft().getRight().setRight(correctTree.getSentinel());
+		correctTree.getRoot().getLeft().getRight().setColor(NodeColor.BLACK);
+		correctTree.getRoot().getLeft().getRight().setLeft(new RBNode<>(4));
+		correctTree.getRoot().getLeft().getRight().getLeft().setLeft(correctTree.getSentinel());
+		correctTree.getRoot().getLeft().getRight().getLeft().setRight(correctTree.getSentinel());
 		
 		return correctTree;
 	}
