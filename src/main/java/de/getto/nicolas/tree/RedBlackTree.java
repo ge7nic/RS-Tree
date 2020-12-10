@@ -1,7 +1,5 @@
 package de.getto.nicolas.tree;
 
-import java.io.PrintStream;
-
 import de.getto.nicolas.node.*;
 import de.getto.nicolas.util.SideViewPrinter;
 
@@ -22,6 +20,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 		root = sentinel;
 		root.setLeft(sentinel);
 		root.setRight(sentinel);
+		root.setParent(sentinel);
 	}
 	
 	public RedBlackTree(RBNode<T> root) {
@@ -29,13 +28,18 @@ public class RedBlackTree<T extends Comparable<T>> {
 		this.root = root;
 		root.setLeft(sentinel);
 		root.setRight(sentinel);
+		root.setParent(sentinel);
 	}
 	
 	public RBNode<T> getRoot() {
 		return root;
 	}
 	
-	public RBNode<T> getSentinal() {
+	public void setRoot(RBNode<T> root) {
+		this.root = root;
+	}
+	
+	public RBNode<T> getSentinel() {
 		return sentinel;
 	}
 	
@@ -44,7 +48,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	 * @param node The node to add to T
 	 */
 	public void insertNodeBU(RBNode<T> node) {
-		  RBNode<T> temp = null;
+		  RBNode<T> temp = sentinel;
 		  RBNode<T> tempRoot = root;
 		  // Traverse the Tree: Go Left if the new Key is less than the current node, otherwise
 		  // go right.
@@ -58,7 +62,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 		  }
 		  // Set the new node as the new Root if temp didn't change => The Tree is empty.
 		  node.setParent(temp);
-		  if (temp == null) {
+		  if (temp == sentinel) {
 			  root = node;
 			  root.setParent(sentinel);
 		  // If value of the new node is smaller than the current one, set it as a left child
@@ -74,9 +78,9 @@ public class RedBlackTree<T extends Comparable<T>> {
 		  insertNodeUBFixup(node);
 	}
 	
+	//TODO : FIX
 	private void insertNodeUBFixup(RBNode<T> node) {
-		while (node.getParent().getColor() == NodeColor.RED) {
-			// if node's parent is the left child of its parent (it's parent is node's uncle)
+		while (node != root && node.getParent().getColor() == NodeColor.RED) {
 			if (node.getParent() == node.getParent().getParent().getLeft()) {
 				RBNode<T> rightUncle = node.getParent().getParent().getRight();
 				if (rightUncle.getColor() == NodeColor.RED) {
@@ -85,28 +89,36 @@ public class RedBlackTree<T extends Comparable<T>> {
 					rightUncle.setColor(NodeColor.BLACK);
 					node.getParent().getParent().setColor(NodeColor.RED);
 					node = node.getParent().getParent();
-				} else if (node == node.getParent().getRight()) { // if node is the right child
-					// Case 2
-					node = node.getParent();
-					rotateLeft(node);
+				} else {
+					if (node == node.getParent().getRight()) {
+						// Case 2
+						node = node.getParent();
+						rotateLeft(node);
+					}
 					// Case 3
 					node.getParent().setColor(NodeColor.BLACK);
 					node.getParent().getParent().setColor(NodeColor.RED);
-					rotateRight(node.getParent().getParent());
+					rotateRight(node);
 				}
-			}  else { // if node is the left child (same as right, but mirrored)
+			} else {
+				// left Uncle
 				RBNode<T> leftUncle = node.getParent().getParent().getLeft();
 				if (leftUncle.getColor() == NodeColor.RED) {
+					// Case 1
 					node.getParent().setColor(NodeColor.BLACK);
 					leftUncle.setColor(NodeColor.BLACK);
 					node.getParent().getParent().setColor(NodeColor.RED);
 					node = node.getParent().getParent();
-				} else if (node == node.getParent().getLeft()) {
-					node = node.getParent();
-					rotateRight(node);
+				} else {
+					if (node == node.getParent().getLeft()) {
+						// Case 2
+						node = node.getParent();
+						rotateRight(node);
+					}
+					// Case 3
 					node.getParent().setColor(NodeColor.BLACK);
 					node.getParent().getParent().setColor(NodeColor.RED);
-					rotateLeft(node.getParent().getParent());
+					rotateLeft(node);
 				}
 			}
 		}
@@ -118,14 +130,14 @@ public class RedBlackTree<T extends Comparable<T>> {
 	 * Rotate the Tree to the left. Used for Insert-Fixup.
 	 * @param node The node which the rotation "pivots" around.
 	 */
-	private void rotateLeft(RBNode<T> node) {
+	protected void rotateLeft(RBNode<T> node) {
 		RBNode<T> y = node.getRight();
 		node.setRight(y.getLeft());
-		if (y.getLeft() != null) {
+		if (y.getLeft() != sentinel) {
 			y.getLeft().setParent(node);
 		}
 		y.setParent(node.getParent());
-		if (node.getParent() == null) {
+		if (node.getParent() == sentinel) {
 			root = y;
 		} else if (node == node.getParent().getLeft()) {
 			node.getParent().setLeft(y);
@@ -143,11 +155,11 @@ public class RedBlackTree<T extends Comparable<T>> {
 	private void rotateRight(RBNode<T> node) {
 		RBNode<T> y = node.getLeft();
 		node.setLeft(y.getRight());
-		if (y.getRight() != null) {
+		if (y.getRight() != sentinel) {
 			y.getRight().setParent(node);
 		}
 		y.setParent(node.getParent());
-		if (node.getParent() == null) {
+		if (node.getParent() == sentinel) {
 			root = y;
 		} else if (node == node.getParent().getRight()) {
 			node.getParent().setRight(y);
@@ -158,22 +170,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 		node.setParent(y);
 	}
 	
-	public void sideViewPrint(PrintStream os) {
-		printer.print(os, root);
-	}
-	
-	/**
-	 * Testmethod to construct a dummy tree.
-	 * @param root
-	 * @param leftChild
-	 * @param rightChild
-	 */
-	public void buildDummyTree(RBNode<T> root, RBNode<T> leftChild, RBNode<T> rightChild,
-			RBNode<T> rightRight, RBNode<T> rightLeft) {
-		insertNodeBU(root);
-		insertNodeBU(leftChild);
-		insertNodeBU(rightChild);
-		insertNodeBU(rightRight);
-		insertNodeBU(rightLeft);
+	public String sideViewPrint() {
+		return printer.print(root);
 	}
 }

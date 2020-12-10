@@ -17,16 +17,13 @@ public class RBNode<T extends Comparable<T>> {
 	
 	public RBNode() {
 		this.key = null;
-		this.color = NodeColor.RED;
+		this.color = NodeColor.BLACK;
 		this.left = null;
 		this.right = null;
 	}
 	
 	public RBNode(T key) {
 		this.key = key;
-		this.color = NodeColor.RED;
-		this.left = null;
-		this.right = null;
 	}
 
 	public NodeColor getColor() {

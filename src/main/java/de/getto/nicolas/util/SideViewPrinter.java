@@ -1,7 +1,5 @@
 package de.getto.nicolas.util;
 
-import java.io.PrintStream;
-
 import de.getto.nicolas.node.*;
 
 /**
@@ -80,7 +78,7 @@ public class SideViewPrinter<T extends Comparable<T>> {
 		}
 	}
 	
-	public void print(PrintStream os, RBNode<T> root) {
-		os.print(preOrderTraverse(root));
+	public String print(RBNode<T> root) {
+		return preOrderTraverse(root);
 	}
 }
