@@ -22,8 +22,6 @@ public class RedBlackTreeTests {
 		emptyTree = new RedBlackTree<Integer>();
 	}
 
-	
-	// TODO: This Test is correct, but the Comparator doesn't work correctly. Fix it.
 	@Test
 	public void insertAlotOfNodesIntoTree() {
 		RedBlackTree<Integer> expectedTree = setupCorrectTree();
