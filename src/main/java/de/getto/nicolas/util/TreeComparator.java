@@ -5,7 +5,8 @@ import de.getto.nicolas.node.RBNode;
 public class TreeComparator {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public boolean isEqualTree(RBNode root, RBNode rootToCompareTo, RBNode rootSentinel, RBNode compareSentinel) {
+	public <U, V> boolean isEqualTree(RBNode root, RBNode rootToCompareTo, 
+			RBNode rootSentinel, RBNode compareSentinel) {
 		if (root == rootSentinel && rootToCompareTo == compareSentinel) {
 			return true;
 		}
