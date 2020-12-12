@@ -185,7 +185,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	 * 	5. Every Path to underlying nodes has the same number of black nodes.
 	 * @return Returns true if the Tree is valid.
 	 */
-	public boolean checkValidity() {
+	public boolean verifyTree() {
 		RBNode<T> node = root;
 		int noOfBlackNodes = 0;
 		while (node != sentinel) {
@@ -200,7 +200,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	
 	private boolean checkSubtree(RBNode<T> node, int noOfBlackNodes) {
 		// Case 2
-		if (node == root || node.getColor() == NodeColor.RED) {
+		if (node == root && node.getColor() == NodeColor.RED) {
 			return false;
 		}
 		// Case 3

@@ -2,6 +2,7 @@ package de.getto.nicolas.tree;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -94,6 +95,48 @@ public class RedBlackTreeTests {
 		assertEquals(8, emptyTree.getRoot().getRight().getKey());
 		assertEquals(7, emptyTree.getRoot().getRight().getLeft().getKey());
 		assertEquals(9, emptyTree.getRoot().getRight().getRight().getKey());
+	}
+	
+	@Test
+	public void verifyEmptyTree() {
+		assertTrue(emptyTree.verifyTree());
+	}
+	
+	@Test
+	public void verifySmallTree() {
+		assertTrue(nonEmptyTree.verifyTree());
+	}
+	
+	@Test
+	public void verifyBigTree() {
+		emptyTree.insertNodeBU(new RBNode<Integer>(11));
+		emptyTree.insertNodeBU(new RBNode<Integer>(14));
+		emptyTree.insertNodeBU(new RBNode<Integer>(2));
+		emptyTree.insertNodeBU(new RBNode<Integer>(1));
+		emptyTree.insertNodeBU(new RBNode<Integer>(7));
+		emptyTree.insertNodeBU(new RBNode<Integer>(8));
+		emptyTree.insertNodeBU(new RBNode<Integer>(5));
+		emptyTree.insertNodeBU(new RBNode<Integer>(15));
+		emptyTree.insertNodeBU(new RBNode<Integer>(4));
+		
+		assertTrue(emptyTree.verifyTree());
+	}
+	
+	@Test
+	public void verifyTreeThatConflictsWithPropertyTwo() {
+		nonEmptyTree.getRoot().setColor(NodeColor.RED);
+		
+		assertFalse(nonEmptyTree.verifyTree());
+	}
+	
+	@Test
+	public void verifyTreeThatConflictsWithPropertyThree() {
+		RBNode<Integer> node = nonEmptyTree.getRoot();
+		while (node != nonEmptyTree.getSentinel()) {
+			node = node.getLeft();
+		}
+		node.setColor(NodeColor.RED);
+		assertFalse(nonEmptyTree.verifyTree());
 	}
 	
 	private void setupTreeForLeftRotation() {
