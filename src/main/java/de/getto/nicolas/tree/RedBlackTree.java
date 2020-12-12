@@ -175,4 +175,46 @@ public class RedBlackTree<T extends Comparable<T>> {
 	public String sideViewPrint() {
 		return printer.print(root);
 	}
+	
+	/**
+	 * 5 Properties:
+	 * 	1. Every node is colored.
+	 * 	2. Root is always Black.
+	 * 	3. Every leaf is Black.
+	 * 	4. Is a node Red, are both Children Black.
+	 * 	5. Every Path to underlying nodes has the same number of black nodes.
+	 * @return Returns true if the Tree is valid.
+	 */
+	public boolean checkValidity() {
+		RBNode<T> node = root;
+		int noOfBlackNodes = 0;
+		while (node != sentinel) {
+			if (node.getColor() == NodeColor.BLACK) {
+				noOfBlackNodes++;
+			}
+			node = node.getLeft();
+		}
+
+		return checkSubtree(root, noOfBlackNodes);
+	}
+	
+	private boolean checkSubtree(RBNode<T> node, int noOfBlackNodes) {
+		// Case 2
+		if (node == root || node.getColor() == NodeColor.RED) {
+			return false;
+		}
+		// Case 3
+		if (node == sentinel && node.getColor() == NodeColor.BLACK) {
+			return noOfBlackNodes == 0;
+		}
+		// Case 4
+		if (node.getColor() == NodeColor.RED) {
+			return (node.getLeft().getColor() == NodeColor.BLACK 
+					&& node.getRight().getColor() == NodeColor.BLACK) ? true : false;
+		} else {
+			noOfBlackNodes--;
+		}
+		return checkSubtree(node.getLeft(), noOfBlackNodes) && checkSubtree(node.getRight(), noOfBlackNodes);
+	}
+	
 }

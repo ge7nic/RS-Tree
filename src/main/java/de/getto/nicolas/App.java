@@ -2,7 +2,6 @@ package de.getto.nicolas;
 
 import de.getto.nicolas.node.RBNode;
 import de.getto.nicolas.tree.RedBlackTree;
-import de.getto.nicolas.util.TreeComparator;
 
 public class App {
 
