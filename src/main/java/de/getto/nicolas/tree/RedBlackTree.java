@@ -80,7 +80,6 @@ public class RedBlackTree<T extends Comparable<T>> {
 		  insertNodeUBFixup(node);
 	}
 	
-	//TODO : FIX
 	private void insertNodeUBFixup(RBNode<T> node) {
 		while (node != root && node.getParent().getColor() == NodeColor.RED) {
 			if (node.getParent() == node.getParent().getParent().getLeft()) {
