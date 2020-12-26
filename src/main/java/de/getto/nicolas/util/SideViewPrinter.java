@@ -4,9 +4,9 @@ import de.getto.nicolas.node.*;
 
 /**
  * This Class prints the Tree in a side view. It uses Preorder Traversal.
- * @author Nick
+ * @author Nicolas Getto
  *
- * @param <T>
+ * @param <T> Value of the Tree to print.
  */
 public class SideViewPrinter<T extends Comparable<T>> {
 	
