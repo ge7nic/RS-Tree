@@ -77,10 +77,10 @@ public class RedBlackTree<T extends Comparable<T>> {
 		  node.setLeft(sentinel);
 		  node.setRight(sentinel);
 		  node.setColor(NodeColor.RED);
-		  insertNodeUBFixup(node);
+		  insertNodeBUFixup(node);
 	}
 	
-	private void insertNodeUBFixup(RBNode<T> node) {
+	private void insertNodeBUFixup(RBNode<T> node) {
 		while (node != root && node.getParent().getColor() == NodeColor.RED) {
 			if (node.getParent() == node.getParent().getParent().getLeft()) {
 				RBNode<T> rightUncle = node.getParent().getParent().getRight();
@@ -125,6 +125,152 @@ public class RedBlackTree<T extends Comparable<T>> {
 		}
 		root.setColor(NodeColor.BLACK);
 		sentinel.setParent(root);
+	}
+	
+	public T deleteNodeByValue(T val) {
+		// TODO: IMPLEMENT THIS
+		return null;
+	}
+	
+	/**
+	 * Deletes a given node. 
+	 * @param node The node to delete.
+	 * @return value of either the deleted node itself (if either the right or left was empty) or the direct successor.
+	 */
+	public T deleteRBNode(RBNode<T> node) {
+		RBNode<T> y = node.getRight() == sentinel || node.getLeft() == sentinel ? node : getTreeSuccessor(node);
+		RBNode<T> z = y.getLeft() != sentinel ? y.getLeft() : y.getRight();
+		z.setParent(y.getParent());
+		if (y.getParent() == sentinel) {
+			root = z;
+		} else if (y == y.getParent().getLeft()) {
+			y.getParent().setLeft(z);
+		} else {
+			y.getParent().setRight(z);
+		}
+		if (y != node) {
+			node.setKey(y.getKey());
+		}
+		if (y.getColor() == NodeColor.BLACK) {
+			deleteNodeFixup(z);
+		}
+		return y.getKey();
+	}
+	
+	/**
+	 * Fixup method for delete. Only gets executed if y is Black.
+	 * 
+	 * @param node either the left of y or the right depending on if left was the minimum in it's subtree or not.
+	 */
+	private void deleteNodeFixup(RBNode<T> node) {
+		RBNode<T> w;
+		while (node != root && node.getColor() == NodeColor.BLACK) {
+			if (node == node.getParent().getLeft()) {
+				w = node.getParent().getRight();
+				if (w.getColor() == NodeColor.RED) {
+					// Case 1
+					w.setColor(NodeColor.BLACK);
+					node.getParent().setColor(NodeColor.RED);
+					rotateLeft(node.getParent());
+					w = node.getParent().getRight();
+				}
+				if (w.getLeft().getColor() == NodeColor.BLACK && w.getRight().getColor() == NodeColor.BLACK) {
+					// Case 2
+					w.setColor(NodeColor.RED);
+					node = node.getParent();
+				} else {
+					if (w.getRight().getColor() == NodeColor.BLACK) {
+						// Case 3
+						w.getLeft().setColor(NodeColor.BLACK);
+						w.setColor(NodeColor.RED);
+						rotateRight(w);
+						w = node.getParent().getRight();
+					}
+					// Case 4
+					w.setColor(node.getParent().getColor());
+					node.getParent().setColor(NodeColor.BLACK);
+					w.getRight().setColor(NodeColor.BLACK);
+					rotateLeft(node.getParent());
+					node = root;
+				}
+			} else {
+				// Same as if clause, but right and left reversed
+				w = node.getParent().getLeft();
+				if (w.getColor() == NodeColor.RED) {
+					// Case 1
+					w.setColor(NodeColor.BLACK);
+					node.getParent().setColor(NodeColor.RED);
+					rotateRight(node.getParent());
+					w = node.getParent().getLeft();
+				}
+				if (w.getRight().getColor() == NodeColor.BLACK && w.getLeft().getColor() == NodeColor.BLACK) {
+					// Case 2
+					w.setColor(NodeColor.RED);
+					node = node.getParent();
+				} else {
+					if (w.getLeft().getColor() == NodeColor.BLACK) {
+						// Case 3
+						w.getRight().setColor(NodeColor.BLACK);
+						w.setColor(NodeColor.RED);
+						rotateLeft(w);
+						w = node.getParent().getLeft();
+					}
+					// Case 4
+					w.setColor(node.getParent().getColor());
+					node.getParent().setColor(NodeColor.BLACK);
+					w.getLeft().setColor(NodeColor.BLACK);
+					rotateRight(node.getParent());
+					node = root;
+				}
+			}
+		}
+		node.setColor(NodeColor.BLACK);
+	}
+	
+	/**
+	 * Method to search for the subtree that succeeds node.
+	 * If the right subtree is not empty, the direct successor tree is the minimum of the right subtree.
+	 * Otherwise if the right subtree is empty and node has a successor temp, then temp is the successor of node.
+	 * @param node root of subtree
+	 * @return the direct successor node, marking the root of the subtree.
+	 */
+	private RBNode<T> getTreeSuccessor(RBNode<T> node) {
+		if (node.getRight() != sentinel) {
+			return getTreeMinimum(node.getRight());
+		}
+		RBNode<T> temp = node.getParent();
+		while (temp != sentinel && node == temp.getRight()) {
+			node = temp;
+			temp = temp.getParent();
+		}
+		return temp;
+	}
+	
+	/**
+	 * Search for the node with min value. Symmetrical to getTreeMaximum.
+	 * @param node Node to start with.
+	 * @return The node with the minimum value.
+	 */
+	private RBNode<T> getTreeMinimum(RBNode<T> node) {
+		RBNode<T> minNode = node;
+		while (minNode.getLeft() != sentinel) {
+			minNode = minNode.getLeft();
+		}
+		return minNode;
+	}
+	
+	/**
+	 * Search for the node with the max value. Symmetrical to getTreeMinimum.
+	 * @param node Node to start with.
+	 * @return The node with the maximum value.
+	 */
+	@SuppressWarnings("unused")
+	private RBNode<T> getTreeMaximum(RBNode<T> node) {
+		RBNode<T> maxNode = node;
+		while (maxNode.getRight() != sentinel) {
+			maxNode = maxNode.getRight();
+		}
+		return maxNode;
 	}
 	
 	/**

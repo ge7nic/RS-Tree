@@ -139,6 +139,81 @@ public class RedBlackTreeTests {
 		assertFalse(nonEmptyTree.verifyTree());
 	}
 	
+	@Test
+	public void deleteNodeThatHasChildrenInBothDirections() {
+		RBNode<Integer> x = new RBNode<Integer>(11);
+		RBNode<Integer> y = new RBNode<Integer>(14);
+		RBNode<Integer> z = new RBNode<Integer>(2);
+		RBNode<Integer> a = new RBNode<Integer>(1);
+		RBNode<Integer> b = new RBNode<Integer>(7);
+		RBNode<Integer> c = new RBNode<Integer>(8);
+		RBNode<Integer> d = new RBNode<Integer>(5);
+		RBNode<Integer> e = new RBNode<Integer>(15);
+		RBNode<Integer> f = new RBNode<Integer>(4);
+		emptyTree.insertNodeBU(x);
+		emptyTree.insertNodeBU(y);
+		emptyTree.insertNodeBU(z);
+		emptyTree.insertNodeBU(a);
+		emptyTree.insertNodeBU(b);
+		emptyTree.insertNodeBU(c);
+		emptyTree.insertNodeBU(d);
+		emptyTree.insertNodeBU(e);
+		emptyTree.insertNodeBU(f);
+
+		assertEquals(4, emptyTree.deleteRBNode(z));
+		assertTrue(emptyTree.verifyTree());	
+	}
+	
+	@Test
+	public void deleteNodeThatHasNoLeftChildButARightOne() {
+		RBNode<Integer> x = new RBNode<Integer>(11);
+		RBNode<Integer> y = new RBNode<Integer>(14);
+		RBNode<Integer> z = new RBNode<Integer>(2);
+		RBNode<Integer> a = new RBNode<Integer>(1);
+		RBNode<Integer> b = new RBNode<Integer>(7);
+		RBNode<Integer> c = new RBNode<Integer>(8);
+		RBNode<Integer> d = new RBNode<Integer>(5);
+		RBNode<Integer> e = new RBNode<Integer>(15);
+		RBNode<Integer> f = new RBNode<Integer>(4);
+		emptyTree.insertNodeBU(x);
+		emptyTree.insertNodeBU(y);
+		emptyTree.insertNodeBU(z);
+		emptyTree.insertNodeBU(a);
+		emptyTree.insertNodeBU(b);
+		emptyTree.insertNodeBU(c);
+		emptyTree.insertNodeBU(d);
+		emptyTree.insertNodeBU(e);
+		emptyTree.insertNodeBU(f);
+
+		assertEquals(14, emptyTree.deleteRBNode(y));
+		assertTrue(emptyTree.verifyTree());	
+	}
+	
+	@Test
+	public void deleteNodeThatHasNoRightChildButALeftOne() {
+		RBNode<Integer> x = new RBNode<Integer>(11);
+		RBNode<Integer> y = new RBNode<Integer>(14);
+		RBNode<Integer> z = new RBNode<Integer>(2);
+		RBNode<Integer> a = new RBNode<Integer>(1);
+		RBNode<Integer> b = new RBNode<Integer>(7);
+		RBNode<Integer> c = new RBNode<Integer>(8);
+		RBNode<Integer> d = new RBNode<Integer>(5);
+		RBNode<Integer> e = new RBNode<Integer>(15);
+		RBNode<Integer> f = new RBNode<Integer>(4);
+		emptyTree.insertNodeBU(x);
+		emptyTree.insertNodeBU(y);
+		emptyTree.insertNodeBU(z);
+		emptyTree.insertNodeBU(a);
+		emptyTree.insertNodeBU(b);
+		emptyTree.insertNodeBU(c);
+		emptyTree.insertNodeBU(d);
+		emptyTree.insertNodeBU(e);
+		emptyTree.insertNodeBU(f);
+
+		assertEquals(5, emptyTree.deleteRBNode(d));
+		assertTrue(emptyTree.verifyTree());	
+	}
+	
 	private void setupTreeForLeftRotation() {
 		emptyTree.setRoot(new RBNode<>(5));
 		emptyTree.getRoot().setColor(NodeColor.BLACK);
