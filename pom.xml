@@ -21,6 +21,11 @@
         <version>5.7.0</version>
         <scope>test</scope>
     </dependency>
+    <dependency>
+    	<groupId>org.openjfx</groupId>
+    	<artifactId>javafx-controls</artifactId>
+    	<version>15.0.1</version>
+  	</dependency>
   </dependencies>
   
   <build>
@@ -37,6 +42,14 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>3.0.0-M5</version>
   		</plugin>
+  		<plugin>
+        	<groupId>org.openjfx</groupId>
+        	<artifactId>javafx-maven-plugin</artifactId>
+        	<version>0.0.5</version>
+        	<configuration>
+            	<mainClass>de.getto.nicolas.App</mainClass>
+        	</configuration>
+    	</plugin>
   	</plugins>
   </build>
 </project>
