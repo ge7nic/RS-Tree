@@ -37,7 +37,10 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <AnchorPane fx:id="anchorPane" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+            <AnchorPane id="anchorPane" fx:id="anchorPane" GridPane.hgrow="ALWAYS" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+               <children>
+                  <Button layoutX="398.0" layoutY="167.0" mnemonicParsing="false" text="Button" />
+               </children></AnchorPane>
          </children>
       </GridPane>
    </center>

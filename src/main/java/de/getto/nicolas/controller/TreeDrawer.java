@@ -58,7 +58,6 @@ public class TreeDrawer extends Canvas {
 		
 		gc.setFont(font);
 		gc.fillText(treeNode.getKey().toString(), circle.getCenterX(), circle.getCenterY());
-		System.out.println(circle.getCenterX() + ":" + circle.getCenterY()); 
 		
 		if (treeNode.getLeft() != sentinel) {
 			drawTreeNodes(gc, treeNode.getLeft(), sentinel, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);

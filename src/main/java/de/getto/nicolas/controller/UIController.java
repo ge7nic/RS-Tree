@@ -3,8 +3,8 @@ package de.getto.nicolas.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.layout.*;
 import javafx.fxml.Initializable;
 
@@ -28,6 +28,7 @@ public class UIController implements Initializable {
 		drawerLayout = new TreeDrawerLayout();
 		
 		rootContainer.setCenter(drawerLayout);
+		
 	}
 
 	@FXML
@@ -47,6 +48,6 @@ public class UIController implements Initializable {
 
 	@FXML
 	private void drawButtonClicked() {
-		drawer.drawTree();
+		drawerLayout.drawTree();
 	}
 }
