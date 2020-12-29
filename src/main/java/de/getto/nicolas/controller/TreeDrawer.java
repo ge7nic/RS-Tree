@@ -1,10 +1,5 @@
 package de.getto.nicolas.controller;
 
-import javax.swing.SwingUtilities;
-
-import java.awt.FontMetrics;
-import com.sun.javafx.tk.Toolkit;
-
 import de.getto.nicolas.node.*;
 import de.getto.nicolas.tree.*;
 import javafx.geometry.Point2D;
@@ -21,6 +16,9 @@ public class TreeDrawer extends Canvas {
 	final Font font = Font.font("Cooper Black", FontWeight.BOLD, 16);
 	
 	public TreeDrawer() {
+		widthProperty().addListener(evt -> drawTree());
+		heightProperty().addListener(evt -> drawTree());
+		
 		createTree();
 	}
 
@@ -60,6 +58,7 @@ public class TreeDrawer extends Canvas {
 		
 		gc.setFont(font);
 		gc.fillText(treeNode.getKey().toString(), circle.getCenterX(), circle.getCenterY());
+		System.out.println(circle.getCenterX() + ":" + circle.getCenterY()); 
 		
 		if (treeNode.getLeft() != sentinel) {
 			drawTreeNodes(gc, treeNode.getLeft(), sentinel, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);

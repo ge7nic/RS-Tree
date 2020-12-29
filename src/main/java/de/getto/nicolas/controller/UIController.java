@@ -3,6 +3,7 @@ package de.getto.nicolas.controller;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.beans.binding.DoubleBinding;
 import javafx.fxml.FXML;
 import javafx.scene.layout.*;
 import javafx.fxml.Initializable;
@@ -19,14 +20,14 @@ public class UIController implements Initializable {
 	private HBox hBox;
 	
 	private TreeDrawer drawer;
+	private TreeDrawerLayout drawerLayout;
 	
 	@Override
 	public void initialize(URL location, ResourceBundle  resources) {
 		drawer = new TreeDrawer();
+		drawerLayout = new TreeDrawerLayout();
 		
-		rootContainer.setCenter(drawer);
-		drawer.widthProperty().bind(rootContainer.widthProperty());
-		drawer.heightProperty().bind(rootContainer.heightProperty().subtract(hBox.heightProperty()));
+		rootContainer.setCenter(drawerLayout);
 	}
 
 	@FXML

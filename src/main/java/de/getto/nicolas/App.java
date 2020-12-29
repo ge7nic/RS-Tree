@@ -30,7 +30,7 @@ public class App extends Application {
 		Parent root = loader.load();
 		
 		stage.setScene(new Scene(root));
-		stage.setResizable(false);
+		
 		stage.show();
 		
 	}
