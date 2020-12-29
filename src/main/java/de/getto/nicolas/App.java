@@ -24,11 +24,13 @@ public class App extends Application {
 	@Override
 	public void start(Stage stage) throws IOException {
 		FXMLLoader loader = new FXMLLoader();
-		URL testURL = getClass().getResource("/TestScene.fxml");
-		loader.setLocation(testURL);
+		// URL testURL = getClass().getResource("/TestScene.fxml");
+		URL mainURL = getClass().getResource("/MainScene.fxml");
+		loader.setLocation(mainURL);
 		Parent root = loader.load();
 		
 		stage.setScene(new Scene(root));
+		stage.setResizable(false);
 		stage.show();
 		
 	}

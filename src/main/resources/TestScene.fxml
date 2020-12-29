@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.getto.nicolas.controller.UIController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="576.0" prefWidth="1024.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.getto.nicolas.controller.UIController">
    <top>
       <AnchorPane prefHeight="97.0" prefWidth="600.0" style="-fx-background-color: #8A2BE2;" BorderPane.alignment="CENTER">
          <children>
@@ -20,6 +20,6 @@
       </AnchorPane>
    </top>
    <center>
-      <AnchorPane fx:id="centerAnchorPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <AnchorPane fx:id="centerPane" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>

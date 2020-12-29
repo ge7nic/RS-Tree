@@ -1,22 +1,51 @@
 package de.getto.nicolas.controller;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.*;
+import javafx.fxml.Initializable;
 
-public class UIController {
+public class UIController implements Initializable {
+	
+	@FXML
+	private AnchorPane anchorPane;
+	
+	@FXML
+	private BorderPane rootContainer;
+	
+	@FXML
+	private HBox hBox;
+	
+	private TreeDrawer drawer;
+	
+	@Override
+	public void initialize(URL location, ResourceBundle  resources) {
+		drawer = new TreeDrawer();
+		
+		rootContainer.setCenter(drawer);
+		drawer.widthProperty().bind(rootContainer.widthProperty());
+		drawer.heightProperty().bind(rootContainer.heightProperty().subtract(hBox.heightProperty()));
+	}
 
 	@FXML
-	private Button clickButton;
+	private void insertButtonClicked() {
+		
+	}
 	
 	@FXML
-	private Label label;
+	private void deleteButtonClicked() {
+		
+	}
 	
 	@FXML
-	private AnchorPane centerAnchorPane;
-	
+	private void searchButtonClicked() {
+		
+	}
+
 	@FXML
-	private void buttonClicked() {
-		System.out.println("Clicked on " + clickButton.getText());
+	private void drawButtonClicked() {
+		drawer.drawTree();
 	}
 }
