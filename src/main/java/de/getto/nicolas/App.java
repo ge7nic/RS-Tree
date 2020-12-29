@@ -1,7 +1,9 @@
 package de.getto.nicolas;
 
-import de.getto.nicolas.node.RBNode;
-import de.getto.nicolas.tree.RedBlackTree;
+import java.io.IOException;
+import java.net.URL;
+
+import de.getto.nicolas.node.*;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -14,13 +16,21 @@ import javafx.scene.paint.Stop;
 import javafx.scene.*;
 import javafx.stage.*;
 import javafx.stage.StageStyle;
+import javafx.fxml.*;
 
 @SuppressWarnings("unused")
 public class App extends Application {
 
 	@Override
-	public void start(Stage stage) {
-		sampleProgram(stage);
+	public void start(Stage stage) throws IOException {
+		FXMLLoader loader = new FXMLLoader();
+		URL testURL = getClass().getResource("/TestScene.fxml");
+		loader.setLocation(testURL);
+		Parent root = loader.load();
+		
+		stage.setScene(new Scene(root));
+		stage.show();
+		
 	}
 	
 	public static void main(String[] args) {
