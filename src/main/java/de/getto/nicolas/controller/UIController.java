@@ -1,34 +1,25 @@
 package de.getto.nicolas.controller;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.layout.*;
-import javafx.fxml.Initializable;
 
-public class UIController implements Initializable {
+public class UIController {
 	
 	@FXML
 	private AnchorPane anchorPane;
-	
 	@FXML
 	private BorderPane rootContainer;
-	
 	@FXML
 	private HBox hBox;
 	
-	private TreeDrawer drawer;
-	private TreeDrawerLayout drawerLayout;
+	private TreeCanvas canvas;
 	
-	@Override
-	public void initialize(URL location, ResourceBundle  resources) {
-		drawer = new TreeDrawer();
-		drawerLayout = new TreeDrawerLayout();
+	public void initialize() {
+		canvas = new TreeCanvas();
+		rootContainer.setCenter(canvas);
 		
-		rootContainer.setCenter(drawerLayout);
-		
+		canvas.widthProperty().bind(rootContainer.widthProperty());
+		canvas.heightProperty().bind(rootContainer.heightProperty().subtract(50));
 	}
 
 	@FXML
@@ -48,6 +39,6 @@ public class UIController implements Initializable {
 
 	@FXML
 	private void drawButtonClicked() {
-		drawerLayout.drawTree();
+		canvas.drawTree();
 	}
 }
