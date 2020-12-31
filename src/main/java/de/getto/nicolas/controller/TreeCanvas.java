@@ -8,11 +8,10 @@ import javafx.scene.canvas.GraphicsContext;
 
 public class TreeCanvas extends Canvas {
 	
-	private static final int[] TREE_CONTENT = {1, 5, 2, 6, 14, 255};
+	private static final int[] TREE_CONTENT = {4, 5, 3, 6, 14, 255, 2};
 	private static final int TREE_HEIGHT = 7;
 
 	private RedBlackTree<Integer> tree;
-	private GraphicalNode insertNode;
 	
 	
 	public TreeCanvas() {
@@ -42,8 +41,33 @@ public class TreeCanvas extends Canvas {
 		
 		if (tree.getRoot() != tree.getSentinel()) {
 			// Draw Lines
+			drawLines(gc, tree.getRoot(), tree.getSentinel(), 0, getWidth(), 0, getHeight() / TREE_HEIGHT);
 			// Draw Nodes
 			drawNode(gc, tree.getRoot(), tree.getSentinel(), 0, getWidth(), 0, getHeight() / TREE_HEIGHT);
+		}
+	}
+	
+	public void drawLines(GraphicsContext gc, RBNode<Integer> node, RBNode<Integer> sentinel, double xMin, double xMax, double yMin, double yMax) {
+		Point2D linePoint1;
+		Point2D linePoint2;
+		
+		GraphicalLine newLine = new GraphicalLine();
+		
+		if (node.getLeft() != sentinel) {
+			linePoint1 = new Point2D(((xMin + xMax) / 2), yMin + yMax / 2);
+			linePoint2 = new Point2D(((xMin + (xMin + xMax) / 2) / 2), yMin + yMax + yMax / 2);
+			newLine.setPoints(linePoint1, linePoint2);
+			newLine.draw(gc);
+			
+			drawLines(gc, node.getLeft(), sentinel, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+		}
+		if (node.getRight() != sentinel) {
+			linePoint1 = new Point2D((xMin + xMax) / 2, yMin + yMax / 2);
+			linePoint2 = new Point2D((xMax + (xMin + xMax) / 2) / 2, yMin + yMax + yMax / 2);
+			newLine.setPoints(linePoint1, linePoint2);
+			newLine.draw(gc);
+			
+			drawLines(gc, node.getRight(), sentinel, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 		}
 	}
 	
@@ -54,7 +78,7 @@ public class TreeCanvas extends Canvas {
 		drawable.draw(gc);
 		
 		if (node.getLeft() != sentinel) {
-			drawNode(gc, node.getLeft(), sentinel, xMin, (xMax + xMin) / 2, yMin + yMax, yMin);
+			drawNode(gc, node.getLeft(), sentinel, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 		}
 		if (node.getRight() != sentinel) {
 			drawNode(gc, node.getRight(), sentinel, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
