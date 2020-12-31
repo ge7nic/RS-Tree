@@ -37,6 +37,7 @@ public class UIController {
 		} catch (NumberFormatException e) {
 			canvas.writeOnConsole(console, input + " is not a valid number.", ERROR_STYLE);
 		}
+		inputField.clear();
 	}
 	
 	@FXML
@@ -44,16 +45,30 @@ public class UIController {
 		String input = inputField.getText();
 		try {
 			int newInput = Integer.valueOf(input);
-			canvas.removeNode(newInput);
-			canvas.writeOnConsole(console, input + " removed.", SUCCESS_STYLE);
+			if (canvas.removeNode(newInput)) {
+				canvas.writeOnConsole(console, input + " removed.", SUCCESS_STYLE);
+			} else {
+				canvas.writeOnConsole(console, "Node with the value " + newInput + " does not exist.", WARNING_STYLE);
+			}
 		} catch (NumberFormatException e) {
 			canvas.writeOnConsole(console, input + " is not a valid number.", ERROR_STYLE);
 		}
+		inputField.clear();
 	}
 	
 	@FXML
 	private void searchButtonClicked() {
-		
+		String input = inputField.getText();
+		try {
+			int newInput = Integer.valueOf(input);
+			if (canvas.searchNode(newInput)) {
+				canvas.writeOnConsole(console, String.valueOf(newInput), SUCCESS_STYLE);
+			} else {
+				canvas.writeOnConsole(console, "Node with the value " + newInput + " not found.", WARNING_STYLE);
+			}
+		} catch (NumberFormatException e) {
+			canvas.writeOnConsole(console, input + " is not a valid number.", ERROR_STYLE);
+		}
 	}
 	
 	@FXML

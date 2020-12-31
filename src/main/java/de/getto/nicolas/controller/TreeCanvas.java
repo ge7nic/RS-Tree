@@ -5,7 +5,6 @@ import de.getto.nicolas.tree.RedBlackTree;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 
 public class TreeCanvas extends Canvas {
@@ -95,12 +94,19 @@ public class TreeCanvas extends Canvas {
 		drawTree();
 	}
 	
-	public void removeNode(Integer key) {
+	public boolean removeNode(Integer key) {
 		if (!tree.deleteNodeByValue(key)) {
-			
+			return false;
 		}
 		
 		drawTree();
+		return true;
+	}
+	
+	public boolean searchNode(Integer key) {
+		RBNode<Integer> foundNode = tree.findNode(key);
+		
+		return foundNode != tree.getSentinel();
 	}
 	
 	public void writeOnConsole(TextField console, String output, String outputStyle) {
