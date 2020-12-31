@@ -17,6 +17,7 @@ public class RedBlackTreeTests {
 	private RedBlackTree<Integer> emptyTree;
 	private RedBlackTree<Integer> nonEmptyTree = new RedBlackTree<>(new RBNode<>(15));
 	private final TreeComparator comparator = new TreeComparator();
+	private static final int[] TEST_TREE = {11, 14, 2, 1, 7, 8, 5, 15, 4};
 	
 	@BeforeEach
 	public void setup() {
@@ -27,15 +28,7 @@ public class RedBlackTreeTests {
 	public void insertAlotOfNodesIntoTree() {
 		RedBlackTree<Integer> expectedTree = setupCorrectTree();
 		
-		emptyTree.insertNodeBU(new RBNode<Integer>(11));
-		emptyTree.insertNodeBU(new RBNode<Integer>(14));
-		emptyTree.insertNodeBU(new RBNode<Integer>(2));
-		emptyTree.insertNodeBU(new RBNode<Integer>(1));
-		emptyTree.insertNodeBU(new RBNode<Integer>(7));
-		emptyTree.insertNodeBU(new RBNode<Integer>(8));
-		emptyTree.insertNodeBU(new RBNode<Integer>(5));
-		emptyTree.insertNodeBU(new RBNode<Integer>(15));
-		emptyTree.insertNodeBU(new RBNode<Integer>(4));
+		fillTree();
 		
 		assertTrue(comparator.isEqualTree(expectedTree.getRoot(), emptyTree.getRoot(),
 				expectedTree.getSentinel(), emptyTree.getSentinel()));
@@ -109,15 +102,7 @@ public class RedBlackTreeTests {
 	
 	@Test
 	public void verifyBigTree() {
-		emptyTree.insertNodeBU(new RBNode<Integer>(11));
-		emptyTree.insertNodeBU(new RBNode<Integer>(14));
-		emptyTree.insertNodeBU(new RBNode<Integer>(2));
-		emptyTree.insertNodeBU(new RBNode<Integer>(1));
-		emptyTree.insertNodeBU(new RBNode<Integer>(7));
-		emptyTree.insertNodeBU(new RBNode<Integer>(8));
-		emptyTree.insertNodeBU(new RBNode<Integer>(5));
-		emptyTree.insertNodeBU(new RBNode<Integer>(15));
-		emptyTree.insertNodeBU(new RBNode<Integer>(4));
+		fillTree();
 		
 		assertTrue(emptyTree.verifyTree());
 	}
@@ -212,6 +197,62 @@ public class RedBlackTreeTests {
 
 		assertEquals(5, emptyTree.deleteRBNode(d));
 		assertTrue(emptyTree.verifyTree());	
+	}
+	
+	@Test
+	public void searchNodeByExistingValueOnTheRight() {
+		fillTree();
+		
+		assertEquals(8, emptyTree.findNode(8).getKey());
+	}
+	
+	@Test
+	public void searchNodeByExistingValueOnTheLeft() {
+		fillTree();
+		
+		assertEquals(2, emptyTree.findNode(2).getKey());
+	}
+	
+	@Test
+	public void searchNodeByNonExistingValue() {
+		fillTree();
+		
+		assertEquals(null, emptyTree.findNode(255).getKey());
+	}
+	
+	@Test
+	public void deleteNodeByValue() {
+		fillTree();
+		
+		assertTrue(emptyTree.deleteNodeByValue(8));
+	}
+	
+	@Test
+	public void deleteLeafByValue() {
+		fillTree();
+		
+		assertTrue(emptyTree.deleteNodeByValue(15));
+	}
+	
+	@Test
+	public void deleteNodeByValueOnTheLeft() {
+		fillTree();
+		
+		assertTrue(emptyTree.deleteNodeByValue(2));
+	}
+	
+	@Test
+	public void deleteNodeByNonExistingValue() {
+		fillTree();
+		
+		assertFalse(emptyTree.deleteNodeByValue(255));
+	}
+	
+	private void fillTree() {
+		for (int i : TEST_TREE) {
+			RBNode<Integer> node = new RBNode<Integer>(i);
+			emptyTree.insertNodeBU(node);
+		}
 	}
 	
 	private void setupTreeForLeftRotation() {

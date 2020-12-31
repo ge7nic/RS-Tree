@@ -64,6 +64,26 @@ public class RedBlackTree<T extends Comparable<T>> {
 	}
 	
 	/**
+	 * Find Node by value.
+	 * @param val value to search for.
+	 * @return Either the node or sentinel if the value wasnt in the Tree.
+	 */
+	public RBNode<T> findNode(T val) {
+		RBNode<T> node = root;
+		
+		while (node != sentinel) {
+			if (node.getKey().compareTo(val) <= -1) {
+				node = node.getRight();
+			} else if (node.getKey().compareTo(val) >= 1) {
+				node = node.getLeft();
+			} else {
+				return node;
+			}
+		}
+		return sentinel;
+	}
+	
+	/**
 	 * Insert a node using a Bottom up method.
 	 * @param node The node to add to T
 	 */
@@ -145,9 +165,14 @@ public class RedBlackTree<T extends Comparable<T>> {
 		sentinel.setParent(root);
 	}
 	
-	public T deleteNodeByValue(T val) {
-		// TODO: IMPLEMENT THIS
-		return null;
+	public boolean deleteNodeByValue(T val) {
+		RBNode<T> node = findNode(val);
+		
+		if (node != sentinel) {
+			deleteRBNode(node);
+			return true;
+		}
+		return false;
 	}
 	
 	/**

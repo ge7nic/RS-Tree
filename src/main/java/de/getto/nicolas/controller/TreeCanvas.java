@@ -5,6 +5,8 @@ import de.getto.nicolas.tree.RedBlackTree;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextField;
 
 public class TreeCanvas extends Canvas {
 	
@@ -12,6 +14,7 @@ public class TreeCanvas extends Canvas {
 	private static final int TREE_HEIGHT = 7;
 
 	private RedBlackTree<Integer> tree;
+	private RBNode<Integer> insertNode;
 	
 	
 	public TreeCanvas() {
@@ -83,6 +86,26 @@ public class TreeCanvas extends Canvas {
 		if (node.getRight() != sentinel) {
 			drawNode(gc, node.getRight(), sentinel, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 		}
+	}
+	
+	public void insertNewNode(Integer key) {
+		insertNode = new RBNode<Integer>(key);
+		tree.insertNodeBU(insertNode);
+		
+		drawTree();
+	}
+	
+	public void removeNode(Integer key) {
+		if (!tree.deleteNodeByValue(key)) {
+			
+		}
+		
+		drawTree();
+	}
+	
+	public void writeOnConsole(TextField console, String output, String outputStyle) {
+		console.setStyle(outputStyle);
+		console.setText(output);
 	}
 	
 	public void test() {
