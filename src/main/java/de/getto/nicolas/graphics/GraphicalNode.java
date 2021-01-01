@@ -1,4 +1,4 @@
-package de.getto.nicolas.controller;
+package de.getto.nicolas.graphics;
 
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
@@ -16,7 +16,7 @@ public class GraphicalNode {
 	private Font font =  Font.font("Cooper Black", FontWeight.BOLD, 16);
 	private FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(font);
 	
-	public static final int RADIUS = 26;
+	public static final int RADIUS = 20;
 	
 	private RBNode<Integer> node;
 	

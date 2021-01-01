@@ -20,11 +20,11 @@ public class UIController {
 	private TreeCanvas canvas;
 
 	public void initialize() {
-		canvas = new TreeCanvas();
+		canvas = new TreeCanvas(console);
 		
 		rootContainer.setCenter(canvas);
 		canvas.widthProperty().bind(rootContainer.widthProperty());
-		canvas.heightProperty().bind(rootContainer.heightProperty().subtract(70));
+		canvas.heightProperty().bind(rootContainer.heightProperty().subtract(80));
 	}
 	
 	@FXML
@@ -32,10 +32,13 @@ public class UIController {
 		String input = inputField.getText();
 		try {
 			int newInput = Integer.valueOf(input);
-			canvas.insertNewNode(newInput);
-			canvas.writeOnConsole(console, input + " added.", SUCCESS_STYLE);
+			if (canvas.insertNewNode(newInput)) {
+				canvas.writeOnConsole(input + " added.", SUCCESS_STYLE);
+			} else {
+				canvas.writeOnConsole("Maximum TreeHeight reached. Node not added.", WARNING_STYLE);
+			}
 		} catch (NumberFormatException e) {
-			canvas.writeOnConsole(console, input + " is not a valid number.", ERROR_STYLE);
+			canvas.writeOnConsole(input + " is not a valid number.", ERROR_STYLE);
 		}
 		inputField.clear();
 	}
@@ -46,12 +49,12 @@ public class UIController {
 		try {
 			int newInput = Integer.valueOf(input);
 			if (canvas.removeNode(newInput)) {
-				canvas.writeOnConsole(console, input + " removed.", SUCCESS_STYLE);
+				canvas.writeOnConsole(input + " removed.", SUCCESS_STYLE);
 			} else {
-				canvas.writeOnConsole(console, "Node with the value " + newInput + " does not exist.", WARNING_STYLE);
+				canvas.writeOnConsole("Node with the value " + newInput + " does not exist.", WARNING_STYLE);
 			}
 		} catch (NumberFormatException e) {
-			canvas.writeOnConsole(console, input + " is not a valid number.", ERROR_STYLE);
+			canvas.writeOnConsole(input + " is not a valid number.", ERROR_STYLE);
 		}
 		inputField.clear();
 	}
@@ -62,18 +65,18 @@ public class UIController {
 		try {
 			int newInput = Integer.valueOf(input);
 			if (canvas.searchNode(newInput)) {
-				canvas.writeOnConsole(console, String.valueOf(newInput), SUCCESS_STYLE);
+				canvas.writeOnConsole(String.valueOf(newInput), SUCCESS_STYLE);
 			} else {
-				canvas.writeOnConsole(console, "Node with the value " + newInput + " not found.", WARNING_STYLE);
+				canvas.writeOnConsole("Node with the value " + newInput + " not found.", WARNING_STYLE);
 			}
 		} catch (NumberFormatException e) {
-			canvas.writeOnConsole(console, input + " is not a valid number.", ERROR_STYLE);
+			canvas.writeOnConsole(input + " is not a valid number.", ERROR_STYLE);
 		}
 	}
 	
 	@FXML
 	private void drawButtonClicked() {
 		canvas.test();
-		canvas.writeOnConsole(console, "Test Warning", WARNING_STYLE);
+		canvas.writeOnConsole("Test Warning", WARNING_STYLE);
 	}
 }

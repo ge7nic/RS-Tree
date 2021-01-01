@@ -1,4 +1,4 @@
-package de.getto.nicolas.controller;
+package de.getto.nicolas.graphics;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;

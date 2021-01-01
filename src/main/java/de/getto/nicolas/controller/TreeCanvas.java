@@ -1,5 +1,7 @@
 package de.getto.nicolas.controller;
 
+import de.getto.nicolas.graphics.GraphicalLine;
+import de.getto.nicolas.graphics.GraphicalNode;
 import de.getto.nicolas.node.RBNode;
 import de.getto.nicolas.tree.RedBlackTree;
 import javafx.geometry.Point2D;
@@ -10,15 +12,17 @@ import javafx.scene.control.TextField;
 public class TreeCanvas extends Canvas {
 	
 	private static final int[] TREE_CONTENT = {4, 5, 3, 6, 14, 255, 2};
-	private static final int TREE_HEIGHT = 7;
+	private int treeHeight;
 
 	private RedBlackTree<Integer> tree;
 	private RBNode<Integer> insertNode;
+	private TextField console;
 	
 	
-	public TreeCanvas() {
+	public TreeCanvas(TextField console) {
 		widthProperty().addListener(evt -> drawTree());
 		heightProperty().addListener(evt -> drawTree());
+		this.console = console;
 		
 		createTree();
 	}
@@ -30,7 +34,7 @@ public class TreeCanvas extends Canvas {
 			RBNode<Integer> node = new RBNode<Integer>(i);
 			tree.insertNodeBU(node);
 		}
-		
+		setTreeHeight(7);
 		drawTree();
 	}
 	
@@ -43,9 +47,9 @@ public class TreeCanvas extends Canvas {
 		
 		if (tree.getRoot() != tree.getSentinel()) {
 			// Draw Lines
-			drawLines(gc, tree.getRoot(), tree.getSentinel(), 0, getWidth(), 0, getHeight() / TREE_HEIGHT);
+			drawLines(gc, tree.getRoot(), tree.getSentinel(), 0, getWidth(), 0, getHeight() / treeHeight);
 			// Draw Nodes
-			drawNode(gc, tree.getRoot(), tree.getSentinel(), 0, getWidth(), 0, getHeight() / TREE_HEIGHT);
+			drawNode(gc, tree.getRoot(), tree.getSentinel(), 0, getWidth(), 0, getHeight() / treeHeight);
 		}
 	}
 	
@@ -87,11 +91,16 @@ public class TreeCanvas extends Canvas {
 		}
 	}
 	
-	public void insertNewNode(Integer key) {
+	public boolean insertNewNode(Integer key) {
 		insertNode = new RBNode<Integer>(key);
 		tree.insertNodeBU(insertNode);
+		if (tree.treeHeight(tree.getRoot()) == treeHeight) {
+			tree.deleteRBNode(insertNode);
+			return false;
+		}
 		
 		drawTree();
+		return true;
 	}
 	
 	public boolean removeNode(Integer key) {
@@ -109,12 +118,19 @@ public class TreeCanvas extends Canvas {
 		return foundNode != tree.getSentinel();
 	}
 	
-	public void writeOnConsole(TextField console, String output, String outputStyle) {
+	
+	public void test() {
+		System.out.println(tree.verifyTree());
+		System.out.println(tree.treeHeight(tree.getRoot()));
+		System.out.println(getWidth() + ":" + getHeight());
+	}
+	
+	public void writeOnConsole(String output, String outputStyle) {
 		console.setStyle(outputStyle);
 		console.setText(output);
 	}
 	
-	public void test() {
-		System.out.println(tree.verifyTree());
+	private void setTreeHeight(int i) {
+		treeHeight = i;
 	}
 }
