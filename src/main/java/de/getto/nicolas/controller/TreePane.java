@@ -48,19 +48,20 @@ public class TreePane extends Pane {
 		tree = new RedBlackTree<Integer>();
 		setHeight(7);
 		
-		for (int i : STARTER_TREE) {
+		/*for (int i : STARTER_TREE) {
 			RBNode<Integer> node = new RBNode<Integer>(i);
 			tree.insertNodeBU(node);
-		}
+		}*/
 		drawTree();
 	}
 	
 	public void drawTree() {
 		getChildren().clear();
 		
-		
-		drawLines(tree.getRoot(), tree.getSentinel(), 0, widthProperty().get(), 0, heightProperty().get() / height);
-		drawNodes(tree.getRoot(), tree.getSentinel(), 0, widthProperty().get(), 0, heightProperty().get() / height);
+		if (tree.getRoot() != tree.getSentinel()) {
+			drawLines(tree.getRoot(), tree.getSentinel(), 0, widthProperty().get(), 0, heightProperty().get() / height);
+			drawNodes(tree.getRoot(), tree.getSentinel(), 0, widthProperty().get(), 0, heightProperty().get() / height);
+		}
 	}
 	
 	private void drawNodes(RBNode<Integer> node, RBNode<Integer> sentinel, double xMin, double xMax, double yMin, double yMax) {
