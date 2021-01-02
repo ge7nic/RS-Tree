@@ -176,6 +176,15 @@ public class RedBlackTree<T extends Comparable<T>> {
 	}
 	
 	/**
+	 * Gets the Height of this Tree.
+	 * @param node Root of the current subtree.
+	 * @return Tree height
+	 */
+	public int treeHeight(RBNode<T> node) {
+		return node == sentinel ? -1 : Integer.max(treeHeight(node.getLeft()), treeHeight(node.getRight())) + 1;
+	}
+	
+	/**
 	 * Deletes a given node. 
 	 * @param node The node to delete.
 	 * @return value of either the deleted node itself (if either the right or left was empty) or the direct successor.

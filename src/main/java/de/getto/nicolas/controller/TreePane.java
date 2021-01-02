@@ -26,7 +26,7 @@ import javafx.util.Duration;
 public class TreePane extends Pane {
 	
 	private static final int[] STARTER_TREE = {24, 12, 255, 6, 28, 106};
-	private static final int HEIGHT = 7, RADIUS = 26;
+	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.rgb(255, 215, 0)
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
 
@@ -34,6 +34,8 @@ public class TreePane extends Pane {
 	private FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(font);
 	
 	private RedBlackTree<Integer> tree;
+	private int height;
+	private RBNode<Integer> insertNode;
 	
 	public TreePane() {
 		widthProperty().addListener(evt -> drawTree());
@@ -44,19 +46,21 @@ public class TreePane extends Pane {
 	
 	private void createTree() {
 		tree = new RedBlackTree<Integer>();
+		setHeight(7);
 		
 		for (int i : STARTER_TREE) {
 			RBNode<Integer> node = new RBNode<Integer>(i);
 			tree.insertNodeBU(node);
 		}
+		drawTree();
 	}
 	
 	public void drawTree() {
 		getChildren().clear();
 		
 		
-		drawLines(tree.getRoot(), tree.getSentinel(), 0, widthProperty().get(), 0, heightProperty().get() / HEIGHT);
-		drawNodes(tree.getRoot(), tree.getSentinel(), 0, widthProperty().get(), 0, heightProperty().get() / HEIGHT);
+		drawLines(tree.getRoot(), tree.getSentinel(), 0, widthProperty().get(), 0, heightProperty().get() / height);
+		drawNodes(tree.getRoot(), tree.getSentinel(), 0, widthProperty().get(), 0, heightProperty().get() / height);
 	}
 	
 	private void drawNodes(RBNode<Integer> node, RBNode<Integer> sentinel, double xMin, double xMax, double yMin, double yMax) {
@@ -131,6 +135,46 @@ public class TreePane extends Pane {
 		return group;
 	}
 	
+	/**
+	 * Inserts a new Node. If the Height exceeds 7, it gets incremented up until 10 where a new Node that would exceed that height 
+	 * will be deleted.
+	 * @param val Key of the new Node.
+	 */
+	public void insert(int val) {
+		insertNode = new RBNode<Integer>(val);
+		tree.insertNodeBU(insertNode);
+		drawTree();
+
+		if (tree.treeHeight(tree.getRoot()) >= height - 1 && height < 10) {
+			setHeight(++height);
+		} else if (tree.treeHeight(tree.getRoot()) >= 10) {
+			tree.deleteRBNode(insertNode);
+		}
+	}
+	
+	public boolean delete(int val) {
+		if (!tree.deleteNodeByValue(val)) {
+			return false;
+		}
+		drawTree();
+		return true;
+	}
+	
+	public void search(int val) {
+		RBNode<Integer> node = tree.findNode(val);
+		if (node != tree.getSentinel()) {
+			// found node
+			System.out.println(node);
+		} else {
+			// found nothing
+			System.out.println("Found nothing.");
+		}
+	}
+	
+	private void setHeight(int height) {
+		this.height = height;
+	}
+	
 	public void test() {
 		System.out.println(getWidth() + ":" + getHeight());
 	}
@@ -151,6 +195,7 @@ public class TreePane extends Pane {
 		highlightNode(tree.findNode(val));
 	}
 	
+	// TODO
 	// Find a way to highlight a node, then write something and wait 
 	private void highlightNode(RBNode<Integer> node) {
 		Circle gNode = (Circle) lookup("#" + node.getKey());
