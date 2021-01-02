@@ -12,14 +12,12 @@ public class UIController {
 	@FXML
 	private HBox hBox;
 	
-	private TreeCanvas canvas;
+	private TreePane treePane;
 	
 	public void initialize() {
-		canvas = new TreeCanvas();
-		rootContainer.setCenter(canvas);
+		treePane = new TreePane();
 		
-		canvas.widthProperty().bind(rootContainer.widthProperty());
-		canvas.heightProperty().bind(rootContainer.heightProperty().subtract(50));
+		rootContainer.setCenter(treePane);
 	}
 
 	@FXML
@@ -39,6 +37,6 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
-		canvas.drawTree();
+		treePane.drawTree();
 	}
 }
