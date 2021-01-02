@@ -3,6 +3,7 @@ package de.getto.nicolas.controller;
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 
+import de.getto.nicolas.node.NodeColor;
 import de.getto.nicolas.node.RBNode;
 import de.getto.nicolas.tree.RedBlackTree;
 
@@ -48,10 +49,10 @@ public class TreePane extends Pane {
 		tree = new RedBlackTree<Integer>();
 		setHeight(7);
 		
-		/*for (int i : STARTER_TREE) {
+		for (int i : STARTER_TREE) {
 			RBNode<Integer> node = new RBNode<Integer>(i);
 			tree.insertNodeBU(node);
-		}*/
+		}
 		drawTree();
 	}
 	
@@ -117,7 +118,7 @@ public class TreePane extends Pane {
 		graphicalNode.setStroke(NORMAL_BORDER);
 		graphicalNode.setStrokeWidth(3);
 		graphicalNode.setStrokeType(StrokeType.INSIDE);
-		graphicalNode.setFill(Color.BLACK);
+		graphicalNode.setFill(node.getColor() == NodeColor.BLACK ? Color.BLACK : Color.RED);
 		graphicalNode.setId(node.getKey().toString());
 		
 		group.getChildren().add(graphicalNode);
