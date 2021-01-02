@@ -6,6 +6,7 @@ public class RBNode<T extends Comparable<T>> {
 	private RBNode<T> left;
 	private RBNode<T> right;
 	private RBNode<T> parent;
+	private boolean isHighlighted;
 	
 	@SuppressWarnings("rawtypes")
 	public static final RBNode SENTINEL = new RBNode();
@@ -44,6 +45,10 @@ public class RBNode<T extends Comparable<T>> {
 	public RBNode<T> getParent() {
 		return parent;
 	}
+	
+	public boolean getIsHighlighted() {
+		return isHighlighted;
+	}
 
 	public void setColor(NodeColor color) {
 		this.color = color;
@@ -63,5 +68,9 @@ public class RBNode<T extends Comparable<T>> {
 
 	public void setParent(RBNode<T> parent) {
 		this.parent = parent;
+	}
+	
+	public void setIsHighlighted(boolean isHighlighted) {
+		this.isHighlighted = isHighlighted;
 	}
 }

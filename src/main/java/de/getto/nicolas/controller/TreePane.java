@@ -9,14 +9,9 @@ import de.getto.nicolas.tree.RedBlackTree;
 import javafx.animation.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.NodeOrientation;
-import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
@@ -31,8 +26,8 @@ import javafx.util.Duration;
 public class TreePane extends Pane {
 	
 	private static final int[] STARTER_TREE = {24, 12, 255, 6, 28, 106};
-	private static final int HEIGHT = 7, RADIUS = 20;
-	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHTLIGHT = Color.rgb(255, 215, 0)
+	private static final int HEIGHT = 7, RADIUS = 26;
+	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.rgb(255, 215, 0)
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
 
 	private Font font = Font.font("Cooper Black", FontWeight.BOLD, 16);
@@ -90,6 +85,7 @@ public class TreePane extends Pane {
 			edge.setStartY(yMin + yMax / 2);
 			edge.setEndX(((xMin + (xMin + xMax) / 2) / 2));
 			edge.setEndY(yMin + yMax + yMax / 2);
+			edge.setId("edgeTo" + node.getLeft().getKey().toString());
 			
 			getChildren().add(edge);
 			
@@ -103,6 +99,7 @@ public class TreePane extends Pane {
 			edge.setStartY(yMin+ yMax / 2);
 			edge.setEndX((xMax + (xMin + xMax) / 2) / 2);
 			edge.setEndY(yMin + yMax + yMax / 2);
+			edge.setId("edgeTo" + node.getRight().getKey().toString());
 			
 			getChildren().add(edge);
 			
@@ -116,6 +113,7 @@ public class TreePane extends Pane {
 		graphicalNode.setStrokeWidth(3);
 		graphicalNode.setStrokeType(StrokeType.INSIDE);
 		graphicalNode.setFill(Color.BLACK);
+		graphicalNode.setId(node.getKey().toString());
 		
 		group.getChildren().add(graphicalNode);
 		return createText(group, node);
@@ -147,6 +145,50 @@ public class TreePane extends Pane {
 		return width;
 	}
 	
+	public void animateSearchNodeTest() {
+		int val = 255;
+		
+		highlightNode(tree.findNode(val));
+	}
+	
+	// Find a way to highlight a node, then write something and wait 
+	private void highlightNode(RBNode<Integer> node) {
+		Circle gNode = (Circle) lookup("#" + node.getKey());
+		Circle testNode = (Circle) lookup("#" + tree.findNode(12));
+		Timeline t = new Timeline();
+		
+		KeyValue highlight = new KeyValue(gNode.strokeProperty(), HIGHLIGHT);
+		KeyValue normalize = new KeyValue(gNode.strokeProperty(), Color.DARKRED);
+		
+		KeyFrame highlightNode = new KeyFrame(Duration.ZERO, e -> {
+			try {
+				t.pause();
+				System.out.println("ye");
+				Thread.sleep(2500);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+			t.play();
+		}, highlight);
+		KeyFrame finishUp = new KeyFrame(Duration.millis(250), e -> {
+			
+		}, normalize);
+		
+		t.getKeyFrames().addAll(highlightNode, finishUp);
+		t.setAutoReverse(false);
+		t.setCycleCount(1);
+		
+		/* Maybe add: t.SetOnFinished(new EventHandler<Action Event>() {
+				@Override
+				public void handle(EventAction event) {
+				
+				}
+			}); if needed
+		*/
+		
+		t.play();
+	}
+	
 	private void animateBorder(final Circle circle) {
 		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
 			@Override
@@ -154,7 +196,7 @@ public class TreePane extends Pane {
 				Paint paint = circle.getStroke();
 				
 				if (paint == NORMAL_BORDER) {
-					circle.setStroke(HIGHTLIGHT);
+					circle.setStroke(HIGHLIGHT);
 				} else {
 					circle.setStroke(NORMAL_BORDER);
 				}

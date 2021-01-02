@@ -32,7 +32,7 @@ public class UIController {
 	
 	@FXML
 	private void searchButtonClicked() {
-		
+		treePane.animateSearchNodeTest();
 	}
 
 	@FXML
