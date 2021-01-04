@@ -202,6 +202,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 		}
 		if (y != node) {
 			node.setKey(y.getKey());
+			// copy satellite data from y to node - in this case there is no satellite data
 		}
 		if (y.getColor() == NodeColor.BLACK) {
 			deleteNodeFixup(z);
@@ -217,6 +218,8 @@ public class RedBlackTree<T extends Comparable<T>> {
 	private void deleteNodeFixup(RBNode<T> node) {
 		RBNode<T> w;
 		while (node != root && node.getColor() == NodeColor.BLACK) {
+
+			System.out.println("called.");
 			if (node == node.getParent().getLeft()) {
 				w = node.getParent().getRight();
 				if (w.getColor() == NodeColor.RED) {

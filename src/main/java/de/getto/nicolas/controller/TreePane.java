@@ -16,7 +16,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -26,7 +29,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {24, 12, 255, 6, 28, 106};
+	private static final int[] STARTER_TREE = {7, 2, 11, 1, 5, 8, 14, 4, 15};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.rgb(255, 215, 0)
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -192,64 +195,37 @@ public class TreePane extends Pane {
 	}
 	
 	public void animateSearchNodeTest() {
-		int val = 255;
+		int val = 14;
 		
-		highlightNode(tree.findNode(val));
+		highlightNode(tree.getRoot(), tree.getSentinel(), val, 0, widthProperty().get(), 0, heightProperty().get() / height);
 	}
 	
 	// TODO
-	// Find a way to highlight a node, then write something and wait 
-	private void highlightNode(RBNode<Integer> node) {
-		Circle gNode = (Circle) lookup("#" + node.getKey());
-		Circle testNode = (Circle) lookup("#" + tree.findNode(12));
-		Timeline t = new Timeline();
+	// Use SequentialTransition in Combination with TranslateTransition to animate a FindNode Operation!
+	private void highlightNode(RBNode<Integer> node, RBNode<Integer> sentinel, int val, double xMin, double xMax, double yMin, double yMax) {
+		final Circle c = createHighlightCircle();
+		Circle gNode = (Circle)lookup("#" + val);
+		getChildren().add(c);
 		
-		KeyValue highlight = new KeyValue(gNode.strokeProperty(), HIGHLIGHT);
-		KeyValue normalize = new KeyValue(gNode.strokeProperty(), Color.DARKRED);
+		TranslateTransition tt = new TranslateTransition(Duration.seconds(2), c);
 		
-		KeyFrame highlightNode = new KeyFrame(Duration.ZERO, e -> {
-			try {
-				t.pause();
-				System.out.println("ye");
-				Thread.sleep(2500);
-			} catch (InterruptedException e1) {
-				e1.printStackTrace();
-			}
-			t.play();
-		}, highlight);
-		KeyFrame finishUp = new KeyFrame(Duration.millis(250), e -> {
-			
-		}, normalize);
+		// Translates Circle c not TO the Coordinate X and Y but add's those to the Coordinates. Thanks JavaFX for that naming.
+		tt.setToX(gNode.getParent().getLayoutX() - c.getBoundsInParent().getCenterX());
+		tt.setToY(gNode.getParent().getLayoutY() - c.getBoundsInParent().getCenterY());
 		
-		t.getKeyFrames().addAll(highlightNode, finishUp);
-		t.setAutoReverse(false);
-		t.setCycleCount(1);
+		tt.setOnFinished(e -> {
+			System.out.println("done!");
+		});
 		
-		/* Maybe add: t.SetOnFinished(new EventHandler<Action Event>() {
-				@Override
-				public void handle(EventAction event) {
-				
-				}
-			}); if needed
-		*/
-		
-		t.play();
+		tt.play();
 	}
 	
-	private void animateBorder(final Circle circle) {
-		Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent actionEvent) {
-				Paint paint = circle.getStroke();
-				
-				if (paint == NORMAL_BORDER) {
-					circle.setStroke(HIGHLIGHT);
-				} else {
-					circle.setStroke(NORMAL_BORDER);
-				}
-			}
-		}));
-		timeline.setCycleCount(1000);
-		timeline.play();
+	private Circle createHighlightCircle() {
+		Circle hCircle = new Circle(getWidth() / 2, (getHeight() / height) / 2, RADIUS);
+		hCircle.setStroke(HIGHLIGHT);
+		hCircle.setStrokeWidth(7);
+		hCircle.setFill(Color.TRANSPARENT);
+		
+		return hCircle;
 	}
 }
