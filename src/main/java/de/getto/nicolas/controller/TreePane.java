@@ -119,7 +119,7 @@ public class TreePane extends Pane {
 	private Group createNode(Group group, RBNode<Integer> node) {
 		final Circle graphicalNode = new Circle(RADIUS);
 		graphicalNode.setStroke(NORMAL_BORDER);
-		graphicalNode.setStrokeWidth(3);
+		graphicalNode.setStrokeWidth(5);
 		graphicalNode.setStrokeType(StrokeType.INSIDE);
 		graphicalNode.setFill(node.getColor() == NodeColor.BLACK ? Color.BLACK : Color.RED);
 		graphicalNode.setId(node.getKey().toString());
@@ -195,23 +195,67 @@ public class TreePane extends Pane {
 	}
 	
 	public void animateSearchNodeTest() {
-		int val = 14;
+		int val = 100;
 		
-		highlightNode(tree.getRoot(), tree.getSentinel(), val, 0, widthProperty().get(), 0, heightProperty().get() / height);
+		 //highlightNode(tree.getRoot(), tree.getSentinel(), val);
+		findNodeAnimation(tree.getRoot(), tree.getSentinel(), val);
+	}
+	
+	public void findNodeAnimation(RBNode<Integer> node, RBNode<Integer> sentinel, int val) {
+		Circle c;
+		SequentialTransition seq = new SequentialTransition();
+		PauseTransition p;
+		StrokeTransition st;
+		
+		while (node != sentinel) {
+			c = (Circle)lookup("#" + node.getKey());
+			st = new StrokeTransition(Duration.seconds(0.1), c, NORMAL_BORDER, HIGHLIGHT);
+			seq.getChildren().add(st);
+			p = new PauseTransition(Duration.seconds(2));
+			seq.getChildren().add(p);
+			
+			if (node.getKey() == val) {
+				break;
+			} else if (node.getKey() > val) {
+				node = node.getLeft();
+			} else {
+				node = node.getRight();
+			}
+		}
+		
+		seq.play();
 	}
 	
 	// TODO
 	// Use SequentialTransition in Combination with TranslateTransition to animate a FindNode Operation!
-	private void highlightNode(RBNode<Integer> node, RBNode<Integer> sentinel, int val, double xMin, double xMax, double yMin, double yMax) {
+	private void highlightNode(RBNode<Integer> node, RBNode<Integer> sentinel, int val) {
+		double xMin = 0;
+		double xMax = widthProperty().get();
+		double yMin = 0;
+		double yMax = heightProperty().get() / height;
+		
 		final Circle c = createHighlightCircle();
 		Circle gNode = (Circle)lookup("#" + val);
 		getChildren().add(c);
 		
-		TranslateTransition tt = new TranslateTransition(Duration.seconds(2), c);
+		TranslateTransition tt = new TranslateTransition(Duration.seconds(1), c);
 		
 		// Translates Circle c not TO the Coordinate X and Y but add's those to the Coordinates. Thanks JavaFX for that naming.
-		tt.setToX(gNode.getParent().getLayoutX() - c.getBoundsInParent().getCenterX());
-		tt.setToY(gNode.getParent().getLayoutY() - c.getBoundsInParent().getCenterY());
+		tt.setFromX(c.getTranslateX());
+		tt.setFromY(c.getTranslateY());
+		
+		// go right
+		xMin = (xMin + xMax) / 2;
+		yMin = yMin + yMax;
+		
+		double xDest = (xMin + xMax) / 2;
+		double yDest = yMin + yMax / 2;
+		
+		double xTranslate = xDest - c.getCenterX();
+		double yTranslate = yDest - c.getCenterY();
+		
+		tt.setByX(xTranslate);
+		tt.setByY(yTranslate);
 		
 		tt.setOnFinished(e -> {
 			System.out.println("done!");
