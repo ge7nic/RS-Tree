@@ -15,6 +15,8 @@ public class UIController {
 	private HBox hBox;
 	@FXML
 	private TextField inputField;
+	@FXML
+	private TextField console;
 	
 	private TreePane treePane;
 	
@@ -74,6 +76,6 @@ public class UIController {
 	@FXML
 	private void drawButtonClicked() {
 		
-		treePane.animateSearchNodeTest();
+		treePane.animateSearchNodeTest(console);
 	}
 }

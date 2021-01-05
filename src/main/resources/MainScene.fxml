@@ -38,6 +38,9 @@
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
+         <children>
+            <TextField fx:id="console" editable="false" promptText="Console.." />
+         </children>
       </GridPane>
    </bottom>
 </BorderPane>

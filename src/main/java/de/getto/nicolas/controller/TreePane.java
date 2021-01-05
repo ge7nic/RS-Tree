@@ -12,6 +12,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -31,7 +32,7 @@ public class TreePane extends Pane {
 	
 	private static final int[] STARTER_TREE = {7, 2, 11, 1, 5, 8, 14, 4, 15};
 	private static final int RADIUS = 26;
-	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.rgb(255, 215, 0)
+	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
 
 	private Font font = Font.font("Cooper Black", FontWeight.BOLD, 16);
@@ -194,35 +195,49 @@ public class TreePane extends Pane {
 		return width;
 	}
 	
-	public void animateSearchNodeTest() {
-		int val = 100;
+	public void animateSearchNodeTest(TextField console) {
+		int val = 4;
 		
-		 //highlightNode(tree.getRoot(), tree.getSentinel(), val);
-		findNodeAnimation(tree.getRoot(), tree.getSentinel(), val);
+		findNodeAnimation(console, tree.getRoot(), tree.getSentinel(), val, 2);
 	}
 	
-	public void findNodeAnimation(RBNode<Integer> node, RBNode<Integer> sentinel, int val) {
+	public void findNodeAnimation(TextField console, RBNode<Integer> node, RBNode<Integer> sentinel, int val, double animationLength) {
 		Circle c;
 		SequentialTransition seq = new SequentialTransition();
 		PauseTransition p;
 		StrokeTransition st;
+		FadeTransition fd;
 		
 		while (node != sentinel) {
 			c = (Circle)lookup("#" + node.getKey());
+			
 			st = new StrokeTransition(Duration.seconds(0.1), c, NORMAL_BORDER, HIGHLIGHT);
 			seq.getChildren().add(st);
-			p = new PauseTransition(Duration.seconds(2));
-			seq.getChildren().add(p);
 			
+			fd = new FadeTransition(Duration.seconds(0.1), console);
+			final int nodeVal = node.getKey();
+			
+			fd = new FadeTransition(Duration.millis(10), console);
+			p = new PauseTransition(Duration.seconds(animationLength));
 			if (node.getKey() == val) {
+				fd.setOnFinished(e -> {
+					console.setText("Found node with value " + val +"!");
+				});
+				seq.getChildren().addAll(fd, p);
 				break;
 			} else if (node.getKey() > val) {
+				fd.setOnFinished(e -> {
+					console.setText("Key " + nodeVal + " of this Node is bigger than the value we're searching for -> Go Left.");
+				});
 				node = node.getLeft();
 			} else {
+				fd.setOnFinished(e -> {
+					console.setText("Key " + nodeVal + " of this Node is smaller than the value we're searching for -> Go Right.");
+				});
 				node = node.getRight();
 			}
+			seq.getChildren().addAll(fd, p);
 		}
-		
 		seq.play();
 	}
 	
