@@ -198,15 +198,25 @@ public class TreePane extends Pane {
 	public void animateSearchNodeTest(TextField console) {
 		int val = 4;
 		
-		findNodeAnimation(console, tree.getRoot(), tree.getSentinel(), val, 2);
+		findNodeAnimation(console, val, 3);
 	}
 	
-	public void findNodeAnimation(TextField console, RBNode<Integer> node, RBNode<Integer> sentinel, int val, double animationLength) {
+	/**
+	 * Animates the Algorithm to find a Node in a RedBlack-Tree.
+	 * TODO: If the users searches for a node that doesn't exist, there is no error message yet.
+	 * @param console The TextField giving information to the User.
+	 * @param val The Value the Users wants to find.
+	 * @param animationLength How long the PauseTransitions take.
+	 */
+	public void findNodeAnimation(TextField console, int val, double animationLength) {
 		Circle c;
 		SequentialTransition seq = new SequentialTransition();
 		PauseTransition p;
 		StrokeTransition st;
 		FadeTransition fd;
+		
+		RBNode<Integer> node = tree.getRoot();
+		RBNode<Integer>	sentinel = tree.getSentinel();
 		
 		while (node != sentinel) {
 			c = (Circle)lookup("#" + node.getKey());

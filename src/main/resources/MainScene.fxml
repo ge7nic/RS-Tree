@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
 <BorderPane fx:id="rootContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.getto.nicolas.controller.UIController">
    <top>
@@ -39,8 +40,14 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <TextField fx:id="console" editable="false" promptText="Console.." />
+            <TextField fx:id="console" alignment="TOP_CENTER" editable="false" prefHeight="76.0" prefWidth="900.0" promptText="Console..">
+               <font>
+                  <Font size="24.0" />
+               </font></TextField>
          </children>
+         <BorderPane.margin>
+            <Insets bottom="5.0" />
+         </BorderPane.margin>
       </GridPane>
    </bottom>
 </BorderPane>
