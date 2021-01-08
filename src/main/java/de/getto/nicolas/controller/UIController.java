@@ -2,6 +2,7 @@ package de.getto.nicolas.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 
@@ -17,11 +18,13 @@ public class UIController {
 	private TextField inputField;
 	@FXML
 	private TextField console;
+	@FXML
+	private CheckBox animButton;
 	
 	private TreePane treePane;
 	
 	public void initialize() {
-		treePane = new TreePane();
+		treePane = new TreePane(hBox, console);
 		
 		rootContainer.setCenter(treePane);
 	}
@@ -66,7 +69,7 @@ public class UIController {
 		
 		try {
 			int newVal = Integer.valueOf(input);
-			treePane.search(newVal);
+			treePane.search(newVal, 2);
 		} catch (NumberFormatException e) {
 			Alert newAlert = new Alert(Alert.AlertType.ERROR, input + " is not a valid number.");
 			newAlert.showAndWait();
@@ -75,7 +78,5 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
-		
-		treePane.animateSearchNodeTest(console);
 	}
 }

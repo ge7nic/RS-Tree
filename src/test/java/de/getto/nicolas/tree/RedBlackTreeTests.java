@@ -18,6 +18,8 @@ public class RedBlackTreeTests {
 	private RedBlackTree<Integer> nonEmptyTree = new RedBlackTree<>(new RBNode<>(15));
 	private final TreeComparator comparator = new TreeComparator();
 	
+	private final static int[] STANDARD_TREE = {7, 2, 11, 1, 5, 8, 14, 4, 15};
+	
 	@BeforeEach
 	public void setup() {
 		emptyTree = new RedBlackTree<Integer>();
@@ -212,6 +214,33 @@ public class RedBlackTreeTests {
 
 		assertEquals(5, emptyTree.deleteRBNode(d));
 		assertTrue(emptyTree.verifyTree());	
+	}
+	
+	@Test
+	public void containsRightNodeTrue() {
+		for (int i : STANDARD_TREE) {
+			emptyTree.insertNodeBU(new RBNode<Integer>(i));
+		}
+		
+		assertTrue(emptyTree.contains(14));
+	}
+	
+	@Test
+	public void containsLeftNodeTrue() {
+		for (int i : STANDARD_TREE) {
+			emptyTree.insertNodeBU(new RBNode<Integer>(i));
+		}
+		
+		assertTrue(emptyTree.contains(4));
+	}
+	
+	@Test
+	public void containsNodeFalse() {
+		for (int i : STANDARD_TREE) {
+			emptyTree.insertNodeBU(new RBNode<Integer>(i));
+		}
+		
+		assertFalse(emptyTree.contains(255));
 	}
 	
 	private void setupTreeForLeftRotation() {

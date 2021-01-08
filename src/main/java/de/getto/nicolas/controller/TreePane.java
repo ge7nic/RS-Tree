@@ -8,19 +8,16 @@ import de.getto.nicolas.node.RBNode;
 import de.getto.nicolas.tree.RedBlackTree;
 
 import javafx.animation.*;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.beans.binding.SetBinding;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -41,10 +38,15 @@ public class TreePane extends Pane {
 	private RedBlackTree<Integer> tree;
 	private int height;
 	private RBNode<Integer> insertNode;
+	private HBox controlPanel;
+	private TextField console;
 	
-	public TreePane() {
+	public TreePane(HBox controlPanel, TextField console) {
 		widthProperty().addListener(evt -> drawTree());
 		heightProperty().addListener(evt -> drawTree());
+		
+		this.controlPanel = controlPanel;
+		this.console = console;
 		
 		createTree();
 	}
@@ -166,23 +168,8 @@ public class TreePane extends Pane {
 		return true;
 	}
 	
-	public void search(int val) {
-		RBNode<Integer> node = tree.findNode(val);
-		if (node != tree.getSentinel()) {
-			// found node
-			System.out.println(node);
-		} else {
-			// found nothing
-			System.out.println("Found nothing.");
-		}
-	}
-	
 	private void setHeight(int height) {
 		this.height = height;
-	}
-	
-	public void test() {
-		System.out.println(getWidth() + ":" + getHeight());
 	}
 	
 	private float getStringWidth(String s) {
@@ -195,12 +182,37 @@ public class TreePane extends Pane {
 		return width;
 	}
 	
-	public void animateSearchNodeTest(TextField console) {
-		int val = 4;
+	public void search(final int val, double animationLength) {
+		drawTree();
 		
-		findNodeAnimation(console, val, 3);
+		setButtonDisableToValue(true);
+		CheckBox ab = (CheckBox) controlPanel.lookup("#animButton");
+		
+		if (ab.isSelected()) {
+			searchWithAnimation(val, animationLength);
+		} else {
+			searchWithoutAnimation(val);
+		}
 	}
 	
+	/**
+	 * Searches for a Node without Animation.
+	 * @param val
+	 */
+	public void searchWithoutAnimation(int val) {
+		RBNode<Integer> node = tree.findNode(val);
+		if (node != tree.getSentinel()) {
+			// found node
+			Circle c = (Circle)lookup("#" + val);
+			c.setStroke(HIGHLIGHT);
+			console.setText("Found node with value " + val + ".");
+		} else {
+			// found nothing
+			console.setText("No such node with value " + val + ".");
+		}
+		setButtonDisableToValue(false);
+	}
+		
 	/**
 	 * Animates the Algorithm to find a Node in a RedBlack-Tree.
 	 * TODO: If the users searches for a node that doesn't exist, there is no error message yet.
@@ -208,12 +220,14 @@ public class TreePane extends Pane {
 	 * @param val The Value the Users wants to find.
 	 * @param animationLength How long the PauseTransitions take.
 	 */
-	public void findNodeAnimation(TextField console, int val, double animationLength) {
+	private void searchWithAnimation(final int val, double animationLength) {
 		Circle c;
 		SequentialTransition seq = new SequentialTransition();
 		PauseTransition p;
 		StrokeTransition st;
 		FadeTransition fd;
+		
+		final double strokeTimeInMillis = 10;
 		
 		RBNode<Integer> node = tree.getRoot();
 		RBNode<Integer>	sentinel = tree.getSentinel();
@@ -221,80 +235,52 @@ public class TreePane extends Pane {
 		while (node != sentinel) {
 			c = (Circle)lookup("#" + node.getKey());
 			
-			st = new StrokeTransition(Duration.seconds(0.1), c, NORMAL_BORDER, HIGHLIGHT);
+			st = new StrokeTransition(Duration.millis(strokeTimeInMillis), c, NORMAL_BORDER, HIGHLIGHT);
 			seq.getChildren().add(st);
 			
-			fd = new FadeTransition(Duration.seconds(0.1), console);
+			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
 			final int nodeVal = node.getKey();
 			
-			fd = new FadeTransition(Duration.millis(10), console);
+			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
 			p = new PauseTransition(Duration.seconds(animationLength));
 			if (node.getKey() == val) {
 				fd.setOnFinished(e -> {
 					console.setText("Found node with value " + val +"!");
 				});
-				seq.getChildren().addAll(fd, p);
+				seq.getChildren().add(fd);
 				break;
 			} else if (node.getKey() > val) {
 				fd.setOnFinished(e -> {
-					console.setText("Key " + nodeVal + " of this Node is bigger than the value we're searching for -> Go Left.");
+					console.setText("Key " + nodeVal + " of this Node is bigger than " + val + " -> Go Left.");
 				});
 				node = node.getLeft();
 			} else {
 				fd.setOnFinished(e -> {
-					console.setText("Key " + nodeVal + " of this Node is smaller than the value we're searching for -> Go Right.");
+					console.setText("Key " + nodeVal + " of this Node is smaller than " + val + " -> Go Right.");
 				});
 				node = node.getRight();
 			}
 			seq.getChildren().addAll(fd, p);
 		}
+		
+		if (node == sentinel) {
+			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
+			fd.setOnFinished(e -> {
+				console.setText("No such node with value " + val + ".");
+			});
+			seq.getChildren().add(fd);
+		}
+	
 		seq.play();
-	}
-	
-	// TODO
-	// Use SequentialTransition in Combination with TranslateTransition to animate a FindNode Operation!
-	private void highlightNode(RBNode<Integer> node, RBNode<Integer> sentinel, int val) {
-		double xMin = 0;
-		double xMax = widthProperty().get();
-		double yMin = 0;
-		double yMax = heightProperty().get() / height;
 		
-		final Circle c = createHighlightCircle();
-		Circle gNode = (Circle)lookup("#" + val);
-		getChildren().add(c);
-		
-		TranslateTransition tt = new TranslateTransition(Duration.seconds(1), c);
-		
-		// Translates Circle c not TO the Coordinate X and Y but add's those to the Coordinates. Thanks JavaFX for that naming.
-		tt.setFromX(c.getTranslateX());
-		tt.setFromY(c.getTranslateY());
-		
-		// go right
-		xMin = (xMin + xMax) / 2;
-		yMin = yMin + yMax;
-		
-		double xDest = (xMin + xMax) / 2;
-		double yDest = yMin + yMax / 2;
-		
-		double xTranslate = xDest - c.getCenterX();
-		double yTranslate = yDest - c.getCenterY();
-		
-		tt.setByX(xTranslate);
-		tt.setByY(yTranslate);
-		
-		tt.setOnFinished(e -> {
-			System.out.println("done!");
+		seq.setOnFinished(e -> {
+			setButtonDisableToValue(false);
 		});
-		
-		tt.play();
 	}
 	
-	private Circle createHighlightCircle() {
-		Circle hCircle = new Circle(getWidth() / 2, (getHeight() / height) / 2, RADIUS);
-		hCircle.setStroke(HIGHLIGHT);
-		hCircle.setStrokeWidth(7);
-		hCircle.setFill(Color.TRANSPARENT);
-		
-		return hCircle;
+	private void setButtonDisableToValue(boolean val) {
+		for (Node c : controlPanel.getChildren()) {
+			c.setDisable(val);
+		}
 	}
 }

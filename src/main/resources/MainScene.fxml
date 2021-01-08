@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -26,6 +27,11 @@
             <Button fx:id="deleteButton" mnemonicParsing="false" onAction="#deleteButtonClicked" prefHeight="35.0" prefWidth="90.0" text="Delete" />
             <Button fx:id="searchButton" layoutX="415.0" layoutY="16.0" mnemonicParsing="false" onAction="#searchButtonClicked" prefHeight="35.0" prefWidth="90.0" text="Search" />
             <Button fx:id="drawTestButton" mnemonicParsing="false" onAction="#drawButtonClicked" prefHeight="35.0" prefWidth="90.0" text="TestDraw" />
+            <CheckBox fx:id="animButton" mnemonicParsing="false" prefHeight="17.0" prefWidth="155.0" text="Step-By-Step Animation" translateX="125.0" wrapText="true">
+               <HBox.margin>
+                  <Insets />
+               </HBox.margin>
+            </CheckBox>
          </children>
          <BorderPane.margin>
             <Insets bottom="10.0" />

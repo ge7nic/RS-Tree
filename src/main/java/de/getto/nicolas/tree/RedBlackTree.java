@@ -376,6 +376,10 @@ public class RedBlackTree<T extends Comparable<T>> {
 		return printer.print(root);
 	}
 	
+	public boolean contains(T val) {
+		return findNode(val) != sentinel ? true : false;
+	}
+	
 	/**
 	 * 5 Properties:
 	 * 	1. Every node is colored.
