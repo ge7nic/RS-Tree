@@ -8,7 +8,6 @@ import de.getto.nicolas.node.RBNode;
 import de.getto.nicolas.tree.RedBlackTree;
 
 import javafx.animation.*;
-import javafx.beans.binding.SetBinding;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
