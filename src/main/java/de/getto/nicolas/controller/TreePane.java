@@ -172,8 +172,9 @@ public class TreePane extends Pane {
 		getChildren().add(newNode);
 		
 		SequentialTransition seq = new SequentialTransition();
-		FadeTransition fd;
-		PauseTransition pd;
+		FadeTransition ft;
+		PauseTransition pt;
+		StrokeTransition st;
 		
 		// find coordinates for new Node
 		double xMin = 0, yMin = 0, xMax = widthProperty().get(), yMax = heightProperty().get() / height;
@@ -181,28 +182,30 @@ public class TreePane extends Pane {
 		while (temp != tree.getSentinel()) {
 			place = temp;
 			final int nodeVal = temp.getKey();
+			
+			ft = new FadeTransition(Duration.millis(10), console);
+			st = new StrokeTransition(Duration.millis(10), (Circle)lookup("#" + nodeVal), NORMAL_BORDER, HIGHLIGHT);
+			
 			if (val < temp.getKey()) {
 				xMax = (xMin + xMax) / 2;
 				yMin = yMin + yMax;
 				temp = temp.getLeft();
 				
-				fd = new FadeTransition(Duration.millis(10), console);
-				fd.setOnFinished(e -> {
+				ft.setOnFinished(e -> {
 					console.setText("Key " + nodeVal + " of this Node is bigger than " + val + " -> Go Left.");
 				});
-				pd = new PauseTransition(Duration.seconds(1));
+				pt = new PauseTransition(Duration.seconds(1));
 			} else {
 				xMin = (xMin + xMax) / 2;
 				yMin = yMin + yMax;
 				temp = temp.getRight();
-				
-				fd = new FadeTransition(Duration.millis(10), console);
-				fd.setOnFinished(e -> {
+	
+				ft.setOnFinished(e -> {
 					console.setText("Key " + nodeVal + " of this Node is smaller or equal than " + val + " -> Go Right.");
 				});
-				pd = new PauseTransition(Duration.seconds(1));
+				pt = new PauseTransition(Duration.seconds(1));
 			}
-			seq.getChildren().addAll(fd, pd);
+			seq.getChildren().addAll(ft, st, pt);
 		}
 		
 		double newX = ((xMin + xMax) / 2) - 40;
