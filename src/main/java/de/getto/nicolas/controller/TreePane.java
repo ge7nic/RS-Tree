@@ -159,6 +159,70 @@ public class TreePane extends Pane {
 		}
 	}
 	
+	public void insertWithAnimation(int val) {
+		insertNode = new RBNode<Integer>(val);
+		RBNode<Integer> place = tree.getSentinel();
+		RBNode<Integer> temp = tree.getRoot();
+
+		Group newNode = createNode(new Group(), insertNode);
+
+		newNode.setLayoutX(40);
+		newNode.setLayoutY((heightProperty().get() / height) / 2);
+		
+		getChildren().add(newNode);
+		
+		SequentialTransition seq = new SequentialTransition();
+		FadeTransition fd;
+		PauseTransition pd;
+		
+		// find coordinates for new Node
+		double xMin = 0, yMin = 0, xMax = widthProperty().get(), yMax = heightProperty().get() / height;
+		
+		while (temp != tree.getSentinel()) {
+			place = temp;
+			final int nodeVal = temp.getKey();
+			if (val < temp.getKey()) {
+				xMax = (xMin + xMax) / 2;
+				yMin = yMin + yMax;
+				temp = temp.getLeft();
+				
+				fd = new FadeTransition(Duration.millis(10), console);
+				fd.setOnFinished(e -> {
+					console.setText("Key " + nodeVal + " of this Node is bigger than " + val + " -> Go Left.");
+				});
+				pd = new PauseTransition(Duration.seconds(1));
+			} else {
+				xMin = (xMin + xMax) / 2;
+				yMin = yMin + yMax;
+				temp = temp.getRight();
+				
+				fd = new FadeTransition(Duration.millis(10), console);
+				fd.setOnFinished(e -> {
+					console.setText("Key " + nodeVal + " of this Node is smaller or equal than " + val + " -> Go Right.");
+				});
+				pd = new PauseTransition(Duration.seconds(1));
+			}
+			seq.getChildren().addAll(fd, pd);
+		}
+		
+		double newX = ((xMin + xMax) / 2) - 40;
+		double newY = yMin + yMax / 2 - ((heightProperty().get() / height) / 2);
+		// move to coordinates
+		TranslateTransition tt = new TranslateTransition(Duration.seconds(1.5), newNode);
+		tt.setToX(newX);
+		tt.setToY(newY);
+		
+		seq.getChildren().add(tt);
+		// clean up the tree
+		
+		// finish and draw the tree
+		seq.play();
+		seq.setOnFinished(e -> {
+			tree.insertNodeBU(insertNode);
+			drawTree();
+		});
+	}
+	
 	public boolean delete(int val) {
 		if (!tree.deleteNodeByValue(val)) {
 			return false;
@@ -277,6 +341,10 @@ public class TreePane extends Pane {
 		});
 	}
 	
+	/**
+	 * Disables or Enables all Control Buttons. 
+	 * @param val
+	 */
 	private void setButtonDisableToValue(boolean val) {
 		for (Node c : controlPanel.getChildren()) {
 			c.setDisable(val);

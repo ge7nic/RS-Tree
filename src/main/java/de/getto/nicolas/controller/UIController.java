@@ -35,8 +35,8 @@ public class UIController {
 		
 		try {
 			int newVal = Integer.valueOf(input);
-			if (newVal > 9999) {
-				Alert newAlert = new Alert(Alert.AlertType.WARNING, "Value can not be over 999.");
+			if (newVal > 9999 || newVal < -9999) {
+				Alert newAlert = new Alert(Alert.AlertType.WARNING, "Value can not be over 9999 or under -9999.");
 				newAlert.showAndWait();
 				return;
 			}
@@ -78,5 +78,6 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
+		treePane.insertWithAnimation(13);
 	}
 }

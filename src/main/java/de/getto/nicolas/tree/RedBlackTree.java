@@ -332,7 +332,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	 * Rotate the Tree to the left. Used for Insert-Fixup.
 	 * @param node The node which the rotation "pivots" around.
 	 */
-	protected void rotateLeft(RBNode<T> node) {
+	public void rotateLeft(RBNode<T> node) {
 		RBNode<T> y = node.getRight();
 		node.setRight(y.getLeft());
 		if (y.getLeft() != sentinel) {
@@ -354,7 +354,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	 * Rotate the Tree to the right. Used for Insert-Fixup.
 	 * @param node The node which the rotation "pivots" around.
 	 */
-	protected void rotateRight(RBNode<T> node) {
+	public void rotateRight(RBNode<T> node) {
 		RBNode<T> y = node.getLeft();
 		node.setLeft(y.getRight());
 		if (y.getRight() != sentinel) {
