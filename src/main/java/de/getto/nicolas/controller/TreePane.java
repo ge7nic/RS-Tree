@@ -269,8 +269,11 @@ public class TreePane extends Pane {
 	/**
 	 * Method that animates a rotation to the left around a node.
 	 * This Method should only be called if the right child of node is NOT null, otherwise it will crash.
-	 * As of right node the edges are NOT animated.
+	 * As of right now, the edges are NOT animated.
+	 * 
+	 * This method works symmetrically to animateRotateRight.
 	 * @param node The node to rotate around
+	 * @param dir  Rotation direction
 	 * @param xMin xMin position of node
 	 * @param xMax xMax position of node
 	 * @param yMin yMin position of node
@@ -334,6 +337,19 @@ public class TreePane extends Pane {
 		});
 	}
 	
+	/**
+	 * Method that animates a rotation to the right around a node.
+	 * This Method should only be called if the left child of node is NOT null, otherwise it will crash.
+	 * As of right now, the edges are NOT animated.
+	 * 
+	 * This Method works symmetrically to animateRotateLeft.
+	 * @param node The node to rotate around
+	 * @param dir  Rotation direction
+	 * @param xMin xMin position of node
+	 * @param xMax xMax position of node
+	 * @param yMin yMin position of node
+	 * @param yMax yMax position of node
+	 */
 	public void animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle leftChild = (Circle)lookup("#" + node.getLeft().getKey());
