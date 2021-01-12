@@ -78,6 +78,6 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
-		treePane.insertWithAnimation(13);
+		treePane.startAnimateLeft(6);
 	}
 }

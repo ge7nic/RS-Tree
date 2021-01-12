@@ -10,13 +10,17 @@ import de.getto.nicolas.tree.RedBlackTree;
 import javafx.animation.*;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -26,7 +30,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {7, 2, 11, 1, 5, 8, 14, 4, 15};
+	private static final int[] STARTER_TREE = {6, 2, 11, 1, 5, 8, 14, 4, 20, 17};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -39,6 +43,9 @@ public class TreePane extends Pane {
 	private RBNode<Integer> insertNode;
 	private HBox controlPanel;
 	private TextField console;
+	
+	private TranslateTransition tempt;
+	private Circle subtreeTempCircle;
 	
 	public TreePane(HBox controlPanel, TextField console) {
 		widthProperty().addListener(evt -> drawTree());
@@ -149,6 +156,10 @@ public class TreePane extends Pane {
 	 */
 	public void insert(int val) {
 		insertNode = new RBNode<Integer>(val);
+		if (tree.findNode(val) != tree.getSentinel()) {
+			Alert newAlert = new Alert(Alert.AlertType.WARNING, "A Node with the value " + val + " already exists in this Tree.");
+			newAlert.showAndWait();
+		}
 		tree.insertNodeBU(insertNode);
 		drawTree();
 
@@ -218,12 +229,138 @@ public class TreePane extends Pane {
 		seq.getChildren().add(tt);
 		// clean up the tree
 		
+		
 		// finish and draw the tree
 		seq.play();
 		seq.setOnFinished(e -> {
 			tree.insertNodeBU(insertNode);
 			drawTree();
 		});
+	}
+	
+	public void startAnimateLeft(int val) {
+		RBNode<Integer> temp = tree.getRoot();
+		RBNode<Integer> node = tree.findNode(val);
+		double xMin = 0, xMax = getWidth(), yMin = 0, yMax = getHeight() / height;
+		
+		while(temp != tree.getSentinel()) {
+			if (temp.getKey() == val) {
+				// found
+				animateRotateLeft(node, xMin, xMax, yMin, yMax);
+				break;
+			} else if (temp.getKey() > val) {
+				// go left
+				xMax = (xMin + xMax) / 2;
+				yMin = yMin + yMax;
+				temp = temp.getLeft();
+			} else {
+				// go right
+				xMin = (xMin + xMax) / 2;
+				yMin = yMin + yMax;
+				temp = temp.getRight();
+			}
+		}
+	}
+	
+	/**
+	 * Method that animates a rotation to the left around a node.
+	 * This Method should only be called if the right child of node is NOT null, otherwise it will crash.
+	 * As of right node the edges are NOT animated.
+	 * @param node The node to rotate around
+	 * @param xMin xMin position of node
+	 * @param xMax xMax position of node
+	 * @param yMin yMin position of node
+	 * @param yMax yMax position of node
+	 */
+	public void animateRotateLeft(RBNode<Integer> node, double xMin, double xMax, double yMin, double yMax) {
+		// Insert a Method to delete all edges in this subtree first. Maybe this looks better?
+		Circle nodeX = (Circle)lookup("#" + node.getKey());
+		Circle rightChild = (Circle)lookup("#" + node.getRight().getKey());
+		
+		TranslateTransition t1 = new TranslateTransition(Duration.seconds(1), nodeX.getParent());
+		TranslateTransition t2 = new TranslateTransition(Duration.seconds(1), rightChild.getParent());
+		ParallelTransition par = new ParallelTransition();
+		
+		//go left
+		xMax = (xMin + xMax) / 2;
+		yMin = yMin + yMax;
+		double layoutLeftX = ((xMin + xMax) / 2);
+		double layoutLeftY = yMin + yMax / 2;
+		
+		t1.setByX(-Math.abs(nodeX.getParent().getLayoutX() - layoutLeftX));
+		t1.setByY(Math.abs(nodeX.getParent().getLayoutY() - layoutLeftY));
+		t2.setByX(-Math.abs(rightChild.getParent().getLayoutX() - nodeX.getParent().getLayoutX()));
+		t2.setByY(-Math.abs(rightChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
+		
+		par.getChildren().addAll(t1, t2);
+		
+		// fix subtree alpha
+		// to fix alpha, we just move it down one level
+		ParallelTransition par2;
+		if (node.getLeft() != tree.getSentinel()) {
+			par2 = new ParallelTransition();
+			par2 = moveSubtreeDown(node.getLeft(), par2, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			par.getChildren().add(par2);
+		}
+		// fix subtree beta
+		// to fix beta we move it to be the new right child of x and move it to that position
+		if (node.getRight().getLeft() != tree.getSentinel()) {
+			par2 = new ParallelTransition();
+			// Even though node.getRight().getLeft() is the node we are moving, we want the ending position to be
+			// at node.getLeft().getRight()
+			par2 = moveSubtreeUp(node.getRight().getLeft(), par2, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			par.getChildren().add(par2);
+		}
+		// fix subtree gamma
+		// to fix gamma all we have to do is move it up one level and set it as a child of the original node
+		// for that we have to move up one level again though
+		if (node.getRight().getRight() != tree.getSentinel()) {
+			par2 = new ParallelTransition();
+			// go up one level again
+			xMax = 2 * xMax - xMin;
+			yMin = yMax;
+			par2 = moveSubtreeUp(node.getRight().getRight(), par2, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			par.getChildren().add(par2);
+		}
+		
+		par.play();
+		par.setOnFinished(e -> {
+			tree.rotateLeft(node);
+			drawTree();
+		});
+	}
+	
+	private ParallelTransition moveSubtreeDown(RBNode<Integer> x, ParallelTransition par,
+			double xMin, double xMax, double yMin, double yMax) {
+		if (x != tree.getSentinel()) {
+			moveSubtreeDown(x.getLeft(), par, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			
+			//work
+			subtreeTempCircle = (Circle)lookup("#" + x.getKey());
+			tempt = new TranslateTransition(Duration.seconds(1), subtreeTempCircle.getParent());
+			tempt.setByX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+			tempt.setByY(Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
+			par.getChildren().add(tempt);
+			
+			moveSubtreeDown(x.getRight(), par, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+		}
+		return par;
+	}
+	
+	private ParallelTransition moveSubtreeUp(RBNode<Integer> x, ParallelTransition par,
+			double xMin, double xMax, double yMin, double yMax) {
+		if (x != tree.getSentinel()) {
+			moveSubtreeUp(x.getLeft(), par, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			// work
+			subtreeTempCircle = (Circle)lookup("#" + x.getKey());
+			tempt = new TranslateTransition(Duration.seconds(1), subtreeTempCircle.getParent());
+			tempt.setByX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+			tempt.setByY(-Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
+			par.getChildren().add(tempt);
+			
+			moveSubtreeUp(x.getRight(), par, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+		}
+		return par;
 	}
 	
 	public boolean delete(int val) {
