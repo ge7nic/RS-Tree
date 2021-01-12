@@ -318,7 +318,7 @@ public class TreePane extends Pane {
 			par2 = new ParallelTransition();
 			// go up one level again
 			xMax = 2 * xMax - xMin;
-			yMin = yMax;
+			yMin = yMax - yMin;
 			par2 = moveSubtreeUp(node.getRight().getRight(), par2, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 			par.getChildren().add(par2);
 		}
