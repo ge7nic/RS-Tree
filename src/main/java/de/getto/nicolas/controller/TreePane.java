@@ -30,7 +30,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {6, 2, 11, 1, 5, 8, 14, 4, 20, 17};
+	private static final int[] STARTER_TREE = {6, 3, 11, 2, 5, 8, 14, 4, 20, 17, 0, 1};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -238,7 +238,7 @@ public class TreePane extends Pane {
 		});
 	}
 	
-	public void startAnimateLeft(int val) {
+	public void startAnimateRotation(int val, RotationDirection dir) {
 		RBNode<Integer> temp = tree.getRoot();
 		RBNode<Integer> node = tree.findNode(val);
 		double xMin = 0, xMax = getWidth(), yMin = 0, yMax = getHeight() / height;
@@ -246,7 +246,11 @@ public class TreePane extends Pane {
 		while(temp != tree.getSentinel()) {
 			if (temp.getKey() == val) {
 				// found
-				animateRotateLeft(node, xMin, xMax, yMin, yMax);
+				if (dir == RotationDirection.LEFT) {
+					animateRotateLeft(node, dir, xMin, xMax, yMin, yMax);
+				} else {
+					animateRotateRight(node, dir, xMin, xMax, yMin, yMax);
+				}
 				break;
 			} else if (temp.getKey() > val) {
 				// go left
@@ -272,7 +276,7 @@ public class TreePane extends Pane {
 	 * @param yMin yMin position of node
 	 * @param yMax yMax position of node
 	 */
-	public void animateRotateLeft(RBNode<Integer> node, double xMin, double xMax, double yMin, double yMax) {
+	public void animateRotateLeft(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
 		// Insert a Method to delete all edges in this subtree first. Maybe this looks better?
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle rightChild = (Circle)lookup("#" + node.getRight().getKey());
@@ -281,7 +285,7 @@ public class TreePane extends Pane {
 		TranslateTransition t2 = new TranslateTransition(Duration.seconds(1), rightChild.getParent());
 		ParallelTransition par = new ParallelTransition();
 		
-		//go left
+		//go left so we can move nodeX there
 		xMax = (xMin + xMax) / 2;
 		yMin = yMin + yMax;
 		double layoutLeftX = ((xMin + xMax) / 2);
@@ -294,12 +298,12 @@ public class TreePane extends Pane {
 		
 		par.getChildren().addAll(t1, t2);
 		
+		ParallelTransition par2;
 		// fix subtree alpha
 		// to fix alpha, we just move it down one level
-		ParallelTransition par2;
 		if (node.getLeft() != tree.getSentinel()) {
 			par2 = new ParallelTransition();
-			par2 = moveSubtreeDown(node.getLeft(), par2, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			par2 = moveSubtreeDown(node.getLeft(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 			par.getChildren().add(par2);
 		}
 		// fix subtree beta
@@ -308,7 +312,7 @@ public class TreePane extends Pane {
 			par2 = new ParallelTransition();
 			// Even though node.getRight().getLeft() is the node we are moving, we want the ending position to be
 			// at node.getLeft().getRight()
-			par2 = moveSubtreeUp(node.getRight().getLeft(), par2, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			par2 = moveSubtreeUp(node.getRight().getLeft(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 			par.getChildren().add(par2);
 		}
 		// fix subtree gamma
@@ -319,7 +323,7 @@ public class TreePane extends Pane {
 			// go up one level again
 			xMax = 2 * xMax - xMin;
 			yMin = yMax - yMin;
-			par2 = moveSubtreeUp(node.getRight().getRight(), par2, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			par2 = moveSubtreeUp(node.getRight().getRight(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 			par.getChildren().add(par2);
 		}
 		
@@ -330,35 +334,120 @@ public class TreePane extends Pane {
 		});
 	}
 	
-	private ParallelTransition moveSubtreeDown(RBNode<Integer> x, ParallelTransition par,
+	public void animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+		Circle nodeX = (Circle)lookup("#" + node.getKey());
+		Circle leftChild = (Circle)lookup("#" + node.getLeft().getKey());
+		
+		TranslateTransition t1 = new TranslateTransition(Duration.seconds(1), nodeX.getParent());
+		TranslateTransition t2 = new TranslateTransition(Duration.seconds(1), leftChild.getParent());
+		ParallelTransition par = new ParallelTransition();
+		
+		//go right so we can move nodeX there
+		xMin = (xMin + xMax) / 2;
+		yMin = yMax + yMin;
+		double layoutRightX = ((xMin + xMax) / 2);
+		double layoutRightY = yMin + yMax / 2;
+		
+		t1.setByX(Math.abs(nodeX.getParent().getLayoutX() - layoutRightX));
+		t1.setByY(Math.abs(nodeX.getParent().getLayoutY() - layoutRightY));
+		t2.setByX(Math.abs(leftChild.getParent().getLayoutX() - nodeX.getParent().getLayoutX()));
+		t2.setByY(-Math.abs(leftChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
+		
+		par.getChildren().addAll(t1, t2);
+		
+		ParallelTransition par2;
+		// fix subtree gamma
+		// to fix gamma all we have to do is move it down one level
+		if (node.getRight() != tree.getSentinel()) {
+			par2 = new ParallelTransition();
+			par2 = moveSubtreeDown(node.getRight(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			par.getChildren().add(par2);
+		}
+		// fix subtree beta
+		// this also works symmetrically to left rotation
+		if (node.getLeft().getRight() != tree.getSentinel()) {
+			par2 = new ParallelTransition();
+			// Even though node.getLeft().getRight() is the node we are moving, we want the ending position to be
+			// at node.getRight().getLeft()
+			par2 = moveSubtreeUp(node.getLeft().getRight(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			par.getChildren().add(par2);
+		}
+		// fix subtree alpha
+		// to fix alpha we do it symetrically to fix gamma in a left rotation
+		if (node.getLeft().getLeft() != tree.getSentinel()) {
+			par2 = new ParallelTransition();
+			// go up one level again
+			xMin = 2 * xMin - xMax;
+			yMin = yMin - yMax;
+			par2 = moveSubtreeUp(node.getLeft().getLeft(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			par.getChildren().add(par2);
+		}
+		par.play();
+		par.setOnFinished(e -> {
+			tree.rotateRight(node);
+			drawTree();
+		});
+	}
+	
+	/**
+	 * Move the Subtree downwards, which is defined by x as the root.
+	 * @param x Root of Subtree.
+	 * @param par The ParallelTransition that ultimately animates the Tree downwards
+	 * @param dir Rotation Direction, dictates if the correct TranslateTransision is applied
+	 * @param xMin xMin of x
+	 * @param xMax xMax of x
+	 * @param yMin yMin of x
+	 * @param yMax yMax of x
+	 * @return The done animation of Subtree
+	 */
+	private ParallelTransition moveSubtreeDown(RBNode<Integer> x, ParallelTransition par, RotationDirection dir,
 			double xMin, double xMax, double yMin, double yMax) {
 		if (x != tree.getSentinel()) {
-			moveSubtreeDown(x.getLeft(), par, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			moveSubtreeDown(x.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 			
 			//work
 			subtreeTempCircle = (Circle)lookup("#" + x.getKey());
 			tempt = new TranslateTransition(Duration.seconds(1), subtreeTempCircle.getParent());
-			tempt.setByX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+			if (dir == RotationDirection.LEFT) {
+				tempt.setByX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+			} else {
+				tempt.setByX(Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+			}
 			tempt.setByY(Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
 			par.getChildren().add(tempt);
 			
-			moveSubtreeDown(x.getRight(), par, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			moveSubtreeDown(x.getRight(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 		}
 		return par;
 	}
 	
-	private ParallelTransition moveSubtreeUp(RBNode<Integer> x, ParallelTransition par,
+	/**
+	 * Move the Subtree upwards, which is defined by x as the root.
+	 * @param x Root of Subtree.
+	 * @param par The ParallelTransition that ultimately animates the Tree upwards
+	 * @param dir Rotation Direction, dictates if the correct TranslateTransision is applied
+	 * @param xMin xMin of x
+	 * @param xMax xMax of x
+	 * @param yMin yMin of x
+	 * @param yMax yMax of x
+	 * @return The done animation of Subtree
+	 */
+	private ParallelTransition moveSubtreeUp(RBNode<Integer> x, ParallelTransition par, RotationDirection dir,
 			double xMin, double xMax, double yMin, double yMax) {
 		if (x != tree.getSentinel()) {
-			moveSubtreeUp(x.getLeft(), par, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			moveSubtreeUp(x.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 			// work
 			subtreeTempCircle = (Circle)lookup("#" + x.getKey());
 			tempt = new TranslateTransition(Duration.seconds(1), subtreeTempCircle.getParent());
-			tempt.setByX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+			if (dir == RotationDirection.LEFT) {
+				tempt.setByX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+			} else {
+				tempt.setByX(Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+			}
 			tempt.setByY(-Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
 			par.getChildren().add(tempt);
 			
-			moveSubtreeUp(x.getRight(), par, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			moveSubtreeUp(x.getRight(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 		}
 		return par;
 	}
