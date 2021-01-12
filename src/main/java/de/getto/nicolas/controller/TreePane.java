@@ -17,10 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
 import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -406,7 +403,7 @@ public class TreePane extends Pane {
 	}
 	
 	/**
-	 * Move the Subtree downwards, which is defined by x as the root.
+	 * Move a Subtree, which is defined by x as the root, downwards. This is implemented as an Inorder-Tree-Walk.
 	 * @param x Root of Subtree.
 	 * @param par The ParallelTransition that ultimately animates the Tree downwards
 	 * @param dir Rotation Direction, dictates if the correct TranslateTransision is applied
@@ -438,7 +435,7 @@ public class TreePane extends Pane {
 	}
 	
 	/**
-	 * Move the Subtree upwards, which is defined by x as the root.
+	 * Move a Subtree, which is defined by x as the root, upwards. This is implemented as an Inorder-Tree-Walk.
 	 * @param x Root of Subtree.
 	 * @param par The ParallelTransition that ultimately animates the Tree upwards
 	 * @param dir Rotation Direction, dictates if the correct TranslateTransision is applied
@@ -523,7 +520,6 @@ public class TreePane extends Pane {
 		
 	/**
 	 * Animates the Algorithm to find a Node in a RedBlack-Tree.
-	 * TODO: If the users searches for a node that doesn't exist, there is no error message yet.
 	 * @param console The TextField giving information to the User.
 	 * @param val The Value the Users wants to find.
 	 * @param animationLength How long the PauseTransitions take.
