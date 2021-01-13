@@ -78,6 +78,6 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
-		treePane.startAnimateRotation(3, RotationDirection.LEFT);
+		treePane.startAnimateRotation(11, RotationDirection.LEFT);
 	}
 }
