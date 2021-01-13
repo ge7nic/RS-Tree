@@ -27,7 +27,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {7, 3, 11, 2, 5, 8, 14, 4, 20, 17, 0, 1};
+	private static final int[] STARTER_TREE = {6, 3, 11, 2, 5, 8, 14, 4, 20, 17, 0, 1, 7, 9};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -305,7 +305,7 @@ public class TreePane extends Pane {
 		});
 		
 		par.getChildren().addAll(fd, t1, t2);
-		seq.getChildren().addAll(par, pt);
+		seq.getChildren().add(par);
 		
 		ParallelTransition par2;
 		// fix subtree alpha
@@ -320,8 +320,9 @@ public class TreePane extends Pane {
 			
 			par2 = new ParallelTransition();
 			par2 = moveSubtreeDown(node.getLeft(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+			
 			par2.getChildren().add(fd);
-			seq.getChildren().addAll(par2, pt);
+			seq.getChildren().addAll(pt, par2);
 		}
 		// fix subtree beta
 		// to fix beta we move it to be the new right child of x and move it to that position
@@ -337,8 +338,9 @@ public class TreePane extends Pane {
 			// Even though node.getRight().getLeft() is the node we are moving, we want the ending position to be
 			// at node.getLeft().getRight()
 			par2 = moveSubtreeUp(node.getRight().getLeft(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			
 			par2.getChildren().add(fd);
-			seq.getChildren().addAll(par2, pt);
+			seq.getChildren().addAll(pt, par2);
 		}
 		// fix subtree gamma
 		// to fix gamma all we have to do is move it up one level and set it as a child of the original node
@@ -356,10 +358,10 @@ public class TreePane extends Pane {
 			xMax = 2 * xMax - xMin;
 			yMin = yMin - yMax;
 			par2 = moveSubtreeUp(node.getRight().getRight(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			
 			par2.getChildren().add(fd);
-			seq.getChildren().addAll(par2, pt);
+			seq.getChildren().addAll(pt, par2);
 		}
-		
 		seq.play();
 		seq.setOnFinished(e -> {
 			tree.rotateLeft(node);
@@ -387,6 +389,9 @@ public class TreePane extends Pane {
 		TranslateTransition t1 = new TranslateTransition(Duration.seconds(1), nodeX.getParent());
 		TranslateTransition t2 = new TranslateTransition(Duration.seconds(1), leftChild.getParent());
 		ParallelTransition par = new ParallelTransition();
+		SequentialTransition seq = new SequentialTransition();
+		PauseTransition pt = new PauseTransition(Duration.seconds(1));
+		FadeTransition fd = new FadeTransition(Duration.millis(10), console);
 		
 		//go right so we can move nodeX there
 		xMin = (xMin + xMax) / 2;
@@ -399,37 +404,68 @@ public class TreePane extends Pane {
 		t2.setByX(Math.abs(leftChild.getParent().getLayoutX() - nodeX.getParent().getLayoutX()));
 		t2.setByY(-Math.abs(leftChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
 		
-		par.getChildren().addAll(t1, t2);
+		// Helper-Text for the first step
+		fd.setOnFinished(e -> {
+			console.setText("We rotate the main node and it's left Child to the right.");
+		});
+				
+		par.getChildren().addAll(fd, t1, t2);
+		seq.getChildren().add(par);
 		
 		ParallelTransition par2;
 		// fix subtree gamma
 		// to fix gamma all we have to do is move it down one level
 		if (node.getRight() != tree.getSentinel()) {
+			// Helper-Text
+			pt = new PauseTransition(Duration.seconds(1));
+			fd = new FadeTransition(Duration.millis(10), console);
+			fd.setOnFinished(e -> {
+				console.setText("Since Subbtree Gamma is not empty, we fix it.");
+			});
+			
 			par2 = new ParallelTransition();
 			par2 = moveSubtreeDown(node.getRight(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
-			par.getChildren().add(par2);
+			par2.getChildren().add(fd);
+			seq.getChildren().addAll(pt, par2);
 		}
 		// fix subtree beta
 		// this also works symmetrically to left rotation
 		if (node.getLeft().getRight() != tree.getSentinel()) {
+			// Helper-Text
+			pt = new PauseTransition(Duration.seconds(1));
+			fd = new FadeTransition(Duration.millis(10), console);
+			fd.setOnFinished(e -> {
+				console.setText("Since Subbtree Beta is not empty, we fix it.");
+			});
+			
 			par2 = new ParallelTransition();
 			// Even though node.getLeft().getRight() is the node we are moving, we want the ending position to be
 			// at node.getRight().getLeft()
 			par2 = moveSubtreeUp(node.getLeft().getRight(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
-			par.getChildren().add(par2);
+			par2.getChildren().add(fd);
+			seq.getChildren().addAll(pt, par2);
 		}
 		// fix subtree alpha
 		// to fix alpha we do it symetrically to fix gamma in a left rotation
 		if (node.getLeft().getLeft() != tree.getSentinel()) {
+			// Helper-Text
+			pt = new PauseTransition(Duration.seconds(1));
+			fd = new FadeTransition(Duration.millis(10), console);
+			fd.setOnFinished(e -> {
+				console.setText("Since Subbtree Alpha is not empty, we fix it.");
+			});
+						
 			par2 = new ParallelTransition();
 			// go up one level again
 			xMin = 2 * xMin - xMax;
 			yMin = yMin - yMax;
 			par2 = moveSubtreeUp(node.getLeft().getLeft(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
-			par.getChildren().add(par2);
+			par2.getChildren().add(fd);
+			seq.getChildren().addAll(pt, par2);
 		}
-		par.play();
-		par.setOnFinished(e -> {
+		
+		seq.play();
+		seq.setOnFinished(e -> {
 			tree.rotateRight(node);
 			drawTree();
 		});
