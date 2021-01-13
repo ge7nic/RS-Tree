@@ -27,7 +27,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {6, 3, 11, 2, 5, 8, 14, 4, 20, 17, 0, 1, 7, 9};
+	private static final int[] STARTER_TREE = {6, 3, 11, 1, 5, 8, 17, 0, 2, 4, 7, 9, 16, 20, 15};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -58,10 +58,10 @@ public class TreePane extends Pane {
 		tree = new RedBlackTree<Integer>();
 		setHeight(7);
 		
-		for (int i : STARTER_TREE) {
+		/*for (int i : STARTER_TREE) {
 			RBNode<Integer> node = new RBNode<Integer>(i);
 			tree.insertNodeBU(node);
-		}
+		}*/
 		drawTree();
 	}
 	
@@ -146,17 +146,31 @@ public class TreePane extends Pane {
 		return group;
 	}
 	
+	public void insert(int val, double animationLength) {
+		drawTree();
+		
+		setButtonDisableToValue(true);
+		CheckBox ab = (CheckBox) controlPanel.lookup("#animButton");
+		
+		if (ab.isSelected()) {
+			insertWithAnimation(val);
+		} else {
+			insertWithoutAnimation(val);
+		}
+	}
+	
 	/**
 	 * Inserts a new Node. If the Height exceeds 7, it gets incremented up until 10 where a new Node that would exceed that height 
 	 * will be deleted.
 	 * @param val Key of the new Node.
 	 */
-	public void insert(int val) {
+	public void insertWithoutAnimation(int val) {
 		insertNode = new RBNode<Integer>(val);
 		if (tree.findNode(val) != tree.getSentinel()) {
 			Alert newAlert = new Alert(Alert.AlertType.WARNING, "A Node with the value " + val + " already exists in this Tree.");
 			newAlert.showAndWait();
 		}
+		
 		tree.insertNodeBU(insertNode);
 		drawTree();
 
@@ -165,77 +179,152 @@ public class TreePane extends Pane {
 		} else if (tree.treeHeight(tree.getRoot()) >= 10) {
 			tree.deleteRBNode(insertNode);
 		}
+		setButtonDisableToValue(false);
 	}
 	
+	// Test Animation for Insert
 	public void insertWithAnimation(int val) {
+		double xMin = 0, xMax = widthProperty().get(), yMin = 0, yMax = heightProperty().get() / height;
 		insertNode = new RBNode<Integer>(val);
-		RBNode<Integer> place = tree.getSentinel();
-		RBNode<Integer> temp = tree.getRoot();
-
-		Group newNode = createNode(new Group(), insertNode);
-
-		newNode.setLayoutX(40);
-		newNode.setLayoutY((heightProperty().get() / height) / 2);
-		
-		getChildren().add(newNode);
+		RBNode<Integer> temp = tree.getSentinel();
+		RBNode<Integer> tempRoot = tree.getRoot();
 		
 		SequentialTransition seq = new SequentialTransition();
-		FadeTransition ft;
-		PauseTransition pt;
-		StrokeTransition st;
 		
-		// find coordinates for new Node
-		double xMin = 0, yMin = 0, xMax = widthProperty().get(), yMax = heightProperty().get() / height;
+		// create a new node
+		Group g = createNode(new Group(), insertNode);
 		
-		while (temp != tree.getSentinel()) {
-			place = temp;
-			final int nodeVal = temp.getKey();
-			
-			ft = new FadeTransition(Duration.millis(10), console);
-			st = new StrokeTransition(Duration.millis(10), (Circle)lookup("#" + nodeVal), NORMAL_BORDER, HIGHLIGHT);
-			
-			if (val < temp.getKey()) {
+		// find pos for new Node g
+		while (tempRoot != tree.getSentinel()) {
+			temp = tempRoot;
+			if (insertNode.getKey() < tempRoot.getKey()) {
 				xMax = (xMin + xMax) / 2;
 				yMin = yMin + yMax;
-				temp = temp.getLeft();
 				
-				ft.setOnFinished(e -> {
-					console.setText("Key " + nodeVal + " of this Node is bigger than " + val + " -> Go Left.");
-				});
-				pt = new PauseTransition(Duration.seconds(1));
+				tempRoot = tempRoot.getLeft();
 			} else {
 				xMin = (xMin + xMax) / 2;
 				yMin = yMin + yMax;
-				temp = temp.getRight();
-	
-				ft.setOnFinished(e -> {
-					console.setText("Key " + nodeVal + " of this Node is smaller or equal than " + val + " -> Go Right.");
-				});
-				pt = new PauseTransition(Duration.seconds(1));
+				
+				tempRoot = tempRoot.getRight();
 			}
-			seq.getChildren().addAll(ft, st, pt);
 		}
+		double gLayoutX = ((xMin + xMax) / 2);
+		double gLayoutY = yMin + yMax / 2;
+		g.setLayoutX(gLayoutX);
+		g.setLayoutY(gLayoutY);
 		
-		double newX = ((xMin + xMax) / 2) - 40;
-		double newY = yMin + yMax / 2 - ((heightProperty().get() / height) / 2);
-		// move to coordinates
-		TranslateTransition tt = new TranslateTransition(Duration.seconds(1.5), newNode);
-		tt.setToX(newX);
-		tt.setToY(newY);
+		// insert the node without fixing it so we can animate the fixing part
+		tree.insertNodeBU(insertNode, false);
 		
-		seq.getChildren().add(tt);
-		// clean up the tree
+		getChildren().add(g);
 		
-		
-		// finish and draw the tree
+		seq.getChildren().add(animateFixup(insertNode));
 		seq.play();
+		
 		seq.setOnFinished(e -> {
-			tree.insertNodeBU(insertNode);
+			tree.insertNodeBUFixup(insertNode);
 			drawTree();
+			setButtonDisableToValue(false);
 		});
 	}
 	
-	public void startAnimateRotation(int val, RotationDirection dir) {
+	public SequentialTransition animateFixup(RBNode<Integer> node) {
+		SequentialTransition seq = new SequentialTransition();
+		
+		ParallelTransition par;
+		FillTransition fill;
+		Circle c;
+		
+		while (node != tree.getRoot() && node.getParent().getColor() == NodeColor.RED) {
+			par = new ParallelTransition();
+			if (node.getParent() == node.getParent().getParent().getLeft()) {
+				// right side
+				RBNode<Integer> rightUncle = node.getParent().getParent().getRight();
+				if (rightUncle.getColor() == NodeColor.RED) {
+					// Case 1
+					c = (Circle)lookup("#" + node.getParent().getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
+					par.getChildren().add(fill);
+					
+					c = (Circle)lookup("#" + rightUncle.getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
+					par.getChildren().add(fill);
+					
+					c = (Circle)lookup("#" + node.getParent().getParent().getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.RED);
+					par.getChildren().add(fill);
+					
+					node = node.getParent().getParent();
+					
+					seq.getChildren().add(par);
+				} else {
+					if (node == node.getParent().getRight()) {
+						// Case 2
+						node = node.getParent();
+						par.getChildren().add(startAnimateRotation(node.getKey(), RotationDirection.LEFT));
+					}
+					// Case 3
+					c = (Circle)lookup("#" + node.getParent().getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
+					par.getChildren().add(fill);
+					
+					c = (Circle)lookup("#" + node.getParent().getParent().getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.RED);
+					par.getChildren().add(fill);
+					par.getChildren().add(startAnimateRotation(node.getParent().getParent().getKey(), RotationDirection.RIGHT));
+					
+					seq.getChildren().add(par);
+				}
+			} else {
+				// left side
+				RBNode<Integer> leftUncle = node.getParent().getParent().getLeft();
+				if (leftUncle.getColor() == NodeColor.RED) {
+					// Case 1
+					c = (Circle)lookup("#" + node.getParent().getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
+					par.getChildren().add(fill);
+					
+					c = (Circle)lookup("#" + leftUncle.getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
+					par.getChildren().add(fill);
+					
+					c = (Circle)lookup("#" + node.getParent().getParent().getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.RED);
+					par.getChildren().add(fill);
+					
+					node = node.getParent().getParent();
+					
+					seq.getChildren().add(par);
+				} else {
+					if (node == node.getParent().getLeft()) {
+						// Case 2
+						node = node.getParent();
+						par.getChildren().add(startAnimateRotation(node.getKey(), RotationDirection.RIGHT));
+					}
+					// Case 3
+					c = (Circle)lookup("#" + node.getParent().getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
+					par.getChildren().add(fill);
+					
+					c = (Circle)lookup("#" + node.getParent().getParent().getKey());
+					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.RED);
+					par.getChildren().add(fill);
+					par.getChildren().add(startAnimateRotation(node.getParent().getParent().getKey(), RotationDirection.LEFT));
+					
+					seq.getChildren().add(par);
+				}
+			}
+		}
+		
+		c = (Circle)lookup("#" + tree.getRoot().getKey());
+		fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
+		seq.getChildren().add(fill);
+		
+		return seq;
+	}
+	
+	public SequentialTransition startAnimateRotation(int val, RotationDirection dir) {
 		RBNode<Integer> temp = tree.getRoot();
 		RBNode<Integer> node = tree.findNode(val);
 		double xMin = 0, xMax = getWidth(), yMin = 0, yMax = getHeight() / height;
@@ -244,11 +333,10 @@ public class TreePane extends Pane {
 			if (temp.getKey() == val) {
 				// found
 				if (dir == RotationDirection.LEFT) {
-					animateRotateLeft(node, dir, xMin, xMax, yMin, yMax);
+					return animateRotateLeft(node, dir, xMin, xMax, yMin, yMax);
 				} else {
-					animateRotateRight(node, dir, xMin, xMax, yMin, yMax);
+					return animateRotateRight(node, dir, xMin, xMax, yMin, yMax);
 				}
-				break;
 			} else if (temp.getKey() > val) {
 				// go left
 				xMax = (xMin + xMax) / 2;
@@ -261,6 +349,8 @@ public class TreePane extends Pane {
 				temp = temp.getRight();
 			}
 		}
+		// error
+		return null;
 	}
 	
 	/**
@@ -276,7 +366,7 @@ public class TreePane extends Pane {
 	 * @param yMin yMin position of node
 	 * @param yMax yMax position of node
 	 */
-	public void animateRotateLeft(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+	public SequentialTransition animateRotateLeft(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
 		// Insert a Method to delete all edges in this subtree first. Maybe this looks better?
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle rightChild = (Circle)lookup("#" + node.getRight().getKey());
@@ -362,11 +452,9 @@ public class TreePane extends Pane {
 			par2.getChildren().add(fd);
 			seq.getChildren().addAll(pt, par2);
 		}
-		seq.play();
-		seq.setOnFinished(e -> {
-			tree.rotateLeft(node);
-			drawTree();
-		});
+
+		tree.rotateLeft(node);
+		return seq;
 	}
 	
 	/**
@@ -382,7 +470,7 @@ public class TreePane extends Pane {
 	 * @param yMin yMin position of node
 	 * @param yMax yMax position of node
 	 */
-	public void animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+	public SequentialTransition animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle leftChild = (Circle)lookup("#" + node.getLeft().getKey());
 		
@@ -463,12 +551,9 @@ public class TreePane extends Pane {
 			par2.getChildren().add(fd);
 			seq.getChildren().addAll(pt, par2);
 		}
-		
-		seq.play();
-		seq.setOnFinished(e -> {
-			tree.rotateRight(node);
-			drawTree();
-		});
+
+		tree.rotateRight(node);
+		return seq;
 	}
 	
 	/**
@@ -659,5 +744,9 @@ public class TreePane extends Pane {
 		for (Node c : controlPanel.getChildren()) {
 			c.setDisable(val);
 		}
+	}
+	
+	public void test() {
+		System.out.println(tree.findNode(18).getKey() + " " + tree.findNode(18).getParent().getKey() + " " + tree.findNode(18).getLeft().getKey() + " " + tree.findNode(18).getRight().getKey());
 	}
 }

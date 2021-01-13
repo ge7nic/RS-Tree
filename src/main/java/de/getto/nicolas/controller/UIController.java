@@ -40,7 +40,7 @@ public class UIController {
 				newAlert.showAndWait();
 				return;
 			}
-			treePane.insert(newVal);
+			treePane.insert(newVal, 2);
 		} catch (NumberFormatException e) {
 			Alert newAlert = new Alert(Alert.AlertType.ERROR, input + " is not a valid number.");
 			newAlert.showAndWait();
@@ -78,6 +78,6 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
-		treePane.startAnimateRotation(3, RotationDirection.LEFT);
+		treePane.test();
 	}
 }

@@ -63,11 +63,15 @@ public class RedBlackTree<T extends Comparable<T>> {
 		return sentinel;
 	}
 	
+	public void insertNodeBU(RBNode<T> node) {
+		insertNodeBU(node, true);
+	}
+	
 	/**
 	 * Insert a node using a Bottom up method.
 	 * @param node The node to add to T
 	 */
-	public void insertNodeBU(RBNode<T> node) {
+	public void insertNodeBU(RBNode<T> node, boolean doFixup) {
 		  RBNode<T> temp = sentinel;
 		  RBNode<T> tempRoot = root;
 		  // Traverse the Tree: Go Left if the new Key is less than the current node, otherwise
@@ -95,10 +99,12 @@ public class RedBlackTree<T extends Comparable<T>> {
 		  node.setLeft(sentinel);
 		  node.setRight(sentinel);
 		  node.setColor(NodeColor.RED);
-		  insertNodeBUFixup(node);
+		  if (doFixup) {
+			  insertNodeBUFixup(node);  
+		  }
 	}
 	
-	private void insertNodeBUFixup(RBNode<T> node) {
+	public void insertNodeBUFixup(RBNode<T> node) {
 		while (node != root && node.getParent().getColor() == NodeColor.RED) {
 			if (node.getParent() == node.getParent().getParent().getLeft()) {
 				RBNode<T> rightUncle = node.getParent().getParent().getRight();
