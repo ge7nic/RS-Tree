@@ -228,7 +228,7 @@ public class TreePane extends Pane {
 		seq.play();
 		
 		seq.setOnFinished(e -> {
-			tree.insertNodeBUFixup(insertNode);
+			System.out.println("done!");
 			drawTree();
 			setButtonDisableToValue(false);
 		});
@@ -285,7 +285,8 @@ public class TreePane extends Pane {
 							console.setText(val + " is the right child, so we rotate left pivoting it.");
 						});
 						pause = new PauseTransition(Duration.seconds(animationLength));
-						seq.getChildren().addAll(fade, pause);
+						seq.getChildren().addAll(fade, pause,
+								startAnimateRotation(node.getKey(), RotationDirection.LEFT));
 						tree.rotateLeft(node);
 					}
 					// Case 3
@@ -309,12 +310,13 @@ public class TreePane extends Pane {
 					final int ppVal = node.getParent().getParent().getKey();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
-						console.setText("And now we just rotate right pivoting " + ppVal + " to correct the height.");
+						console.setText("And now we just rotate right pivoting " + ppVal + ".");
 					});
 					pause = new PauseTransition(Duration.seconds(animationLength));
-					tree.rotateRight(node.getParent().getParent());
 					
-					seq.getChildren().addAll(par, fade, pause);
+					seq.getChildren().addAll(par, fade, pause, 
+							startAnimateRotation(node.getParent().getParent().getKey(), RotationDirection.RIGHT));
+					tree.rotateRight(node.getParent().getParent());
 				}
 			} else {
 				RBNode<Integer> leftUncle = node.getParent().getParent().getLeft();
@@ -353,7 +355,8 @@ public class TreePane extends Pane {
 							console.setText(val + " is the left child, so we rotate left pivoting it.");
 						});
 						pause = new PauseTransition(Duration.seconds(animationLength));
-						seq.getChildren().addAll(fade, pause);
+						seq.getChildren().addAll(fade, pause,
+								startAnimateRotation(node.getKey(), RotationDirection.RIGHT));
 						tree.rotateRight(node);
 					}
 					// Case 3
@@ -377,12 +380,13 @@ public class TreePane extends Pane {
 					final int ppVal = node.getParent().getParent().getKey();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
-						console.setText("And now we just rotate left pivoting " + ppVal + " to correct the height.");
+						console.setText("And now we just rotate left pivoting " + ppVal + ".");
 					});
 					pause = new PauseTransition(Duration.seconds(animationLength));
-					tree.rotateLeft(node.getParent().getParent());
 					
-					seq.getChildren().addAll(par, fade, pause);
+					seq.getChildren().addAll(par, fade, pause, 
+							startAnimateRotation(node.getParent().getParent().getKey(), RotationDirection.LEFT));
+					tree.rotateLeft(node.getParent().getParent());
 				}
 			}
 		}
@@ -437,7 +441,6 @@ public class TreePane extends Pane {
 	 * @param yMax yMax position of node
 	 */
 	public ParallelTransition animateRotateLeft(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
-		System.out.println("Moving node " + node.getKey() + " left:" + xMin + ", " + xMax + ", " + yMin + ", " + yMax);
 		// Insert a Method to delete all edges in this subtree first. Maybe this looks better?
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle rightChild = (Circle)lookup("#" + node.getRight().getKey());
@@ -459,8 +462,9 @@ public class TreePane extends Pane {
 		t2.setByY(-Math.abs(rightChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
 		
 		// Helper-Text for the first step
+		final int val = node.getKey();
 		fd.setOnFinished(e -> {
-			console.setText("We rotate the main node and it's right Child to the left.");
+			console.setText("We rotate " + val + " and it's right Child to the left.");
 		});
 		
 		par.getChildren().addAll(fd, t1, t2);
@@ -491,7 +495,6 @@ public class TreePane extends Pane {
 		}
 
 		par.setOnFinished(e -> {
-			tree.rotateLeft(node);
 			drawTree();
 		});
 		
@@ -533,8 +536,9 @@ public class TreePane extends Pane {
 		t2.setByY(-Math.abs(leftChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
 		
 		// Helper-Text for the first step
+		final int val = node.getKey();
 		fd.setOnFinished(e -> {
-			console.setText("We rotate the main node and it's left Child to the right.");
+			console.setText("We rotate " + val + " and it's left Child to the right.");
 		});
 				
 		par.getChildren().addAll(fd, t1, t2);
@@ -564,7 +568,6 @@ public class TreePane extends Pane {
 		}
 
 		par.setOnFinished(e -> {
-			tree.rotateRight(node);
 			drawTree();
 		});
 		return par;
