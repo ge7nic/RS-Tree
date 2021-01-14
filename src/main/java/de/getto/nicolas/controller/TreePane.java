@@ -63,10 +63,10 @@ public class TreePane extends Pane {
 		tree = new RedBlackTree<Integer>();
 		setHeight(7);
 		
-		for (int i : STARTER_TREE) {
+		/*for (int i : STARTER_TREE) {
 			RBNode<Integer> node = new RBNode<Integer>(i);
 			tree.insertNodeBU(node);
-		}
+		}*/
 		drawTree();
 	}
 	
@@ -191,7 +191,6 @@ public class TreePane extends Pane {
 	public void insertWithAnimation(int val) {
 		double xMin = 0, xMax = widthProperty().get(), yMin = 0, yMax = heightProperty().get() / height;
 		insertNode = new RBNode<Integer>(val);
-		RBNode<Integer> temp = tree.getSentinel();
 		RBNode<Integer> tempRoot = tree.getRoot();
 		
 		SequentialTransition seq = new SequentialTransition();
@@ -201,7 +200,6 @@ public class TreePane extends Pane {
 		
 		// find pos for new Node g
 		while (tempRoot != tree.getSentinel()) {
-			temp = tempRoot;
 			if (insertNode.getKey() < tempRoot.getKey()) {
 				xMax = (xMin + xMax) / 2;
 				yMin = yMin + yMax;
@@ -228,7 +226,7 @@ public class TreePane extends Pane {
 		seq.play();
 		
 		seq.setOnFinished(e -> {
-			System.out.println("done!");
+			System.out.println("Done!");
 			drawTree();
 			setButtonDisableToValue(false);
 		});
@@ -391,9 +389,16 @@ public class TreePane extends Pane {
 			}
 		}
 		
+		fade = new FadeTransition(Duration.millis(10), console);
+		fade.setOnFinished(e -> {
+			console.setText("To finish, we just repaint the root black and paint the edges.");
+		});
+		pause = new PauseTransition(Duration.seconds(animationLength));
+		
 		c = (Circle)lookup("#" + tree.getRoot().getKey());
 		fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
-		seq.getChildren().add(fill);
+		seq.getChildren().addAll(fade, pause, fill);
+		tree.getRoot().setColor(NodeColor.BLACK);
 		
 		return seq;
 	}
