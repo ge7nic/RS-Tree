@@ -53,10 +53,7 @@ public class UIController {
 		
 		try {
 			int newVal = Integer.valueOf(input);
-			if (!treePane.delete(newVal)) {
-				Alert newAlert = new Alert(Alert.AlertType.WARNING, input + " is not a Node in this Tree.");
-				newAlert.showAndWait();
-			}
+			treePane.delete(newVal);
 		} catch (NumberFormatException e) {
 			Alert newAlert = new Alert(Alert.AlertType.ERROR, input + " is not a valid number.");
 			newAlert.showAndWait();
@@ -78,7 +75,5 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
-		
-		treePane.test();
 	}
 }

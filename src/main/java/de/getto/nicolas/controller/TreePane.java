@@ -1,8 +1,5 @@
 package de.getto.nicolas.controller;
 
-import java.util.Arrays;
-import java.util.List;
-
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 
@@ -11,11 +8,8 @@ import de.getto.nicolas.node.RBNode;
 import de.getto.nicolas.tree.RedBlackTree;
 
 import javafx.animation.*;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -49,16 +43,12 @@ public class TreePane extends Pane {
 	private TranslateTransition tempt;
 	private Circle subtreeTempCircle;
 	
-	private double translateXForLeftRotationProp;
-	
 	public TreePane(HBox controlPanel, TextField console) {
 		widthProperty().addListener(evt -> drawTree());
 		heightProperty().addListener(evt -> drawTree());
 		
 		this.controlPanel = controlPanel;
 		this.console = console;
-		
-		translateXForLeftRotationProp = 0;
 		
 		createTree();
 	}
@@ -155,44 +145,104 @@ public class TreePane extends Pane {
 		return group;
 	}
 	
+	/*=============================================================================
+	 * HERE ARE THE METHODS TO BE CALLED FROM THE CONTROLLER
+	 * ============================================================================
+	 */
+	
+	/**
+	 * Method that gets called by the controller. Decides if the insertion should be animated.
+	 * It delegates to insertWithAnimation if @param animationLength is true. Otherwise it delegates
+	 * to insertWithoutAnimation.
+	 * @param val The Value of the node that is to be inserted. Duplicates are not allowed.
+	 * @param animationLength How long the animation should take. This only affects pause timers.
+	 */
 	public void insert(int val, double animationLength) {
-		drawTree();
-		
-		setButtonDisableToValue(true);
+		if (tree.findNode(val) != tree.getSentinel()) {
+			console.setStyle("-fx-text-fill: red;");
+			console.setText("A node with the value " + val + " already exists!");
+			return;
+		}
 		CheckBox ab = (CheckBox) controlPanel.lookup("#animButton");
 		
+		console.setStyle("-fx-text-fill: black");
+		drawTree();
+		setButtonDisableToValue(true);
 		if (ab.isSelected()) {
-			insertWithAnimation(val);
+			insertWithAnimation(val, animationLength);
 		} else {
 			insertWithoutAnimation(val);
 		}
 	}
+	
+	public void delete(int val) {
+		if (tree.findNode(val) == tree.getSentinel()) {
+			console.setStyle("-fx-text-fill: red;");
+			console.setText("A node with the value " + val + " does not exists!");
+			return;
+		}
+		CheckBox ab = (CheckBox) controlPanel.lookup("#animButton");
+		
+		console.setStyle("-fx-text-fill: black");
+		drawTree();
+		setButtonDisableToValue(true);
+		if (ab.isSelected()) {
+			// animate deletion
+		} else {
+			deleteWithoutAnimation(val);
+		}
+	}
+	
+	/**
+	 * The Method to be called from the controller. Decides if search should be animated.
+	 * @param val The value to be searched for.
+	 * @param animationLength Lenght of the animation.
+	 */
+	public void search(final int val, double animationLength) {
+		CheckBox ab = (CheckBox) controlPanel.lookup("#animButton");
+		
+		console.setStyle("-fx-text-fill: black");
+		setButtonDisableToValue(true);
+		drawTree();
+		if (ab.isSelected()) {
+			searchWithAnimation(val, animationLength);
+		} else {
+			searchWithoutAnimation(val);
+		}
+	}	
+	
+	/**============================================================================
+	 * HERE ARE THE METHODS THAT THE CONTROLLER-CALLED METHODS DELEGATE TO
+	 * ============================================================================
+	 */
 	
 	/**
 	 * Inserts a new Node. If the Height exceeds 7, it gets incremented up until 10 where a new Node that would exceed that height 
 	 * will be deleted.
 	 * @param val Key of the new Node.
 	 */
-	public void insertWithoutAnimation(int val) {
+	private void insertWithoutAnimation(int val) {
 		insertNode = new RBNode<Integer>(val);
-		if (tree.findNode(val) != tree.getSentinel()) {
-			Alert newAlert = new Alert(Alert.AlertType.WARNING, "A Node with the value " + val + " already exists in this Tree.");
-			newAlert.showAndWait();
-		}
 		
 		tree.insertNodeBU(insertNode);
-		drawTree();
 
 		if (tree.treeHeight(tree.getRoot()) >= height - 1 && height < 10) {
 			setHeight(++height);
 		} else if (tree.treeHeight(tree.getRoot()) >= 10) {
 			tree.deleteRBNode(insertNode);
+			console.setStyle("-fx-text-fill: red;");
+			console.setText("Tree is too big! A maximum height of 10 is allowed.");
 		}
+		
+		drawTree();
 		setButtonDisableToValue(false);
 	}
 	
-	// Test Animation for Insert
-	public void insertWithAnimation(int val) {
+	/**
+	 * Insert a new Node with Animation. 
+	 * @param val
+	 */
+	private void insertWithAnimation(int val, double animationLength) {
 		double xMin = 0, xMax = widthProperty().get(), yMin = 0, yMax = heightProperty().get() / height;
 		insertNode = new RBNode<Integer>(val);
 		RBNode<Integer> tempRoot = tree.getRoot();
@@ -227,22 +277,137 @@ public class TreePane extends Pane {
 		getChildren().add(g);
 		
 		
-		seq.getChildren().add(animateFixup(insertNode));
+		seq.getChildren().add(animateFixup(insertNode, animationLength));
 		seq.play();
 		
 		seq.setOnFinished(e -> {
-			System.out.println("Done!");
+			
+			if (tree.treeHeight(tree.getRoot()) >= height - 1 && height < 10) {
+				setHeight(++height);
+			} else if (tree.treeHeight(tree.getRoot()) >= 10) {
+				tree.deleteRBNode(insertNode);
+				console.setStyle("-fx-text-fill: red;");
+				console.setText("Tree is too big! A maximum height of 10 is allowed.");
+			}
+			
 			drawTree();
 			setButtonDisableToValue(false);
 		});
 	}
+
+	/**
+	 * Delete a Node without Animation.
+	 * @param val Value of the node that is to be deleted. It is expected that this node exists.
+	 */
+	private void deleteWithoutAnimation(int val) {
+		tree.deleteNodeByValue(val);
+		
+		drawTree();
+		setButtonDisableToValue(false);
+	}
 	
-	// animates the fixup || Both Case 2 have an animation error, because two rotations want to be
-	// displayed in one method call - This leads to the second rotatation animation not being displayed
+	private void deleteWithAnimation(int val, double animationLength) {
+		
+	}
 	
-	// To fix it, we have to remember xMin, xMax, yMin and yMax of the nodes (maybe) 
-	public SequentialTransition animateFixup(RBNode<Integer> node) {
-		final double animationLength = 3;
+	/**
+	 * Searches for a Node without Animation.
+	 * @param val
+	 */
+	private void searchWithoutAnimation(int val) {
+		RBNode<Integer> node = tree.findNode(val);
+		if (node != tree.getSentinel()) {
+			// found node
+			Circle c = (Circle)lookup("#" + val);
+			c.setStroke(HIGHLIGHT);
+			console.setText("Found node with value " + val + ".");
+		} else {
+			// found nothing
+			console.setText("No such node with value " + val + ".");
+		}
+		setButtonDisableToValue(false);
+	}
+		
+	/**
+	 * Animates the Algorithm to find a Node in a RedBlack-Tree.
+	 * @param console The TextField giving information to the User.
+	 * @param val The Value the Users wants to find.
+	 * @param animationLength How long the PauseTransitions take.
+	 */
+	private void searchWithAnimation(final int val, double animationLength) {
+		Circle c;
+		SequentialTransition seq = new SequentialTransition();
+		PauseTransition p;
+		StrokeTransition st;
+		FadeTransition fd;
+		
+		final double strokeTimeInMillis = 10;
+		
+		RBNode<Integer> node = tree.getRoot();
+		RBNode<Integer>	sentinel = tree.getSentinel();
+		
+		while (node != sentinel) {
+			c = (Circle)lookup("#" + node.getKey());
+			
+			st = new StrokeTransition(Duration.millis(strokeTimeInMillis), c, NORMAL_BORDER, HIGHLIGHT);
+			seq.getChildren().add(st);
+			
+			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
+			final int nodeVal = node.getKey();
+			
+			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
+			p = new PauseTransition(Duration.seconds(animationLength));
+			if (node.getKey() == val) {
+				fd.setOnFinished(e -> {
+					console.setText("Found node with value " + val +"!");
+				});
+				seq.getChildren().add(fd);
+				break;
+			} else if (node.getKey() > val) {
+				fd.setOnFinished(e -> {
+					console.setText("Key " + nodeVal + " of this Node is bigger than " + val + " -> Go Left.");
+				});
+				node = node.getLeft();
+			} else {
+				fd.setOnFinished(e -> {
+					console.setText("Key " + nodeVal + " of this Node is smaller than " + val + " -> Go Right.");
+				});
+				node = node.getRight();
+			}
+			seq.getChildren().addAll(fd, p);
+		}
+		
+		if (node == sentinel) {
+			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
+			fd.setOnFinished(e -> {
+				console.setText("No such node with value " + val + ".");
+			});
+			seq.getChildren().add(fd);
+		}
+	
+		seq.play();
+		
+		seq.setOnFinished(e -> {
+			setButtonDisableToValue(false);
+		});
+	}
+	
+	
+	/**============================================================================
+	 * HERE ARE HELPER METHODS
+	 * ============================================================================
+	 */
+	
+	/**
+	 * This fixes a faulty tree and comments on it step-by-step. 
+	 * It's a reconstruction of the insertNodeBUFixup method.
+	 * Calling that method first will result in no Animations being shown, because
+	 * the Tree will already be correct. Don't call both methods together.
+	 * 
+	 * @param node Node that got added.
+	 * @return The Animation that plays the Tree Fix.
+	 */
+	private SequentialTransition animateFixup(RBNode<Integer> node, double animationLength) {
 		
 		SequentialTransition seq = new SequentialTransition();
 		
@@ -261,7 +426,7 @@ public class TreePane extends Pane {
 					final int val = node.getKey();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
-						console.setText("Since both " + val + " parent and uncle are red, we swap color's with their parent.");
+						console.setText("Since both " + val + "'s parent and uncle are red, we swap colors with their parent.");
 					});
 					pause = new PauseTransition(Duration.seconds(animationLength));
 					seq.getChildren().addAll(fade, pause);
@@ -297,14 +462,12 @@ public class TreePane extends Pane {
 						seq.getChildren().addAll(fade, pause,
 								startAnimateRotation(node.getKey(), RotationDirection.LEFT));
 						tree.rotateLeft(node);
-						pause = new PauseTransition(Duration.seconds(animationLength));
-						seq.getChildren().add(pause);
 					}
 					// Case 3
 					final int val = node.getKey();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
-						console.setText("Since only " + val + " parent is Red, we just swap colors with its parent.");
+						console.setText("Since only " + val + "'s parent is Red, we just swap colors with its parent.");
 					});
 					pause = new PauseTransition(Duration.seconds(animationLength));
 					seq.getChildren().addAll(fade, pause);
@@ -372,8 +535,6 @@ public class TreePane extends Pane {
 						pause = new PauseTransition(Duration.seconds(animationLength));
 						seq.getChildren().addAll(fade, pause,
 								startAnimateRotation(node.getKey(), RotationDirection.RIGHT));
-						pause = new PauseTransition(Duration.seconds(animationLength));
-						seq.getChildren().add(pause);
 						tree.rotateRight(node);
 					}
 					// Case 3
@@ -405,8 +566,6 @@ public class TreePane extends Pane {
 					seq.getChildren().addAll(par, fade, pause, 
 							startAnimateRotation(node.getParent().getParent().getKey(), RotationDirection.LEFT));
 					tree.rotateLeft(node.getParent().getParent());
-					pause = new PauseTransition(Duration.seconds(animationLength));
-					seq.getChildren().add(pause);
 				}
 			}
 		}
@@ -425,7 +584,14 @@ public class TreePane extends Pane {
 		return seq;
 	}
 	
-	public ParallelTransition startAnimateRotation(int val, RotationDirection dir) {
+	/**
+	 * Starts the Rotation Animation. This finds the correct xMin, xMax, yMin, yMax values 
+	 * and reroutes to the correct direction method.
+	 * @param val
+	 * @param dir
+	 * @return
+	 */
+	private ParallelTransition startAnimateRotation(int val, RotationDirection dir) {
 		RBNode<Integer> temp = tree.getRoot();
 		RBNode<Integer> node = tree.findNode(val);
 		ParallelTransition par = new ParallelTransition();
@@ -470,7 +636,7 @@ public class TreePane extends Pane {
 	 * @param yMin yMin position of node
 	 * @param yMax yMax position of node
 	 */
-	public ParallelTransition animateRotateLeft(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+	private ParallelTransition animateRotateLeft(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
 		// Insert a Method to delete all edges in this subtree first. Maybe this looks better?
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle rightChild = (Circle)lookup("#" + node.getRight().getKey());
@@ -478,7 +644,6 @@ public class TreePane extends Pane {
 		TranslateTransition t1 = new TranslateTransition(Duration.seconds(1), nodeX.getParent());
 		TranslateTransition t2 = new TranslateTransition(Duration.seconds(1), rightChild.getParent());
 		ParallelTransition par = new ParallelTransition();
-		FadeTransition fd = new FadeTransition(Duration.millis(10), console);
 		
 		//pos for right Child
 		double layoutChildX = ((xMin + xMax) / 2);
@@ -495,13 +660,7 @@ public class TreePane extends Pane {
 		t2.setToX(-Math.abs(rightChild.getParent().getLayoutX() - layoutChildX));
 		t2.setToY(-Math.abs(rightChild.getParent().getLayoutY() - layoutChildY));
 		
-		// Helper-Text for the first step
-		final int val = node.getKey();
-		fd.setOnFinished(e -> {
-			console.setText("We rotate " + val + " and it's right Child to the left.");
-		});
-		
-		par.getChildren().addAll(fd, t1, t2);
+		par.getChildren().addAll(t1, t2);
 
 		// fix subtree alpha
 		// to fix alpha, we just move it down one level
@@ -542,7 +701,7 @@ public class TreePane extends Pane {
 	 * @param yMin yMin position of node
 	 * @param yMax yMax position of node
 	 */
-	public ParallelTransition animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+	private ParallelTransition animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle leftChild = (Circle)lookup("#" + node.getLeft().getKey());
 
@@ -652,122 +811,6 @@ public class TreePane extends Pane {
 		return par;
 	}
 	
-	public boolean delete(int val) {
-		if (!tree.deleteNodeByValue(val)) {
-			return false;
-		}
-		drawTree();
-		return true;
-	}
-	
-	private void setHeight(int height) {
-		this.height = height;
-	}
-	
-	private float getStringWidth(String s) {
-		float width = 0;
-		
-		for (char c : s.toCharArray()) {
-			width += fm.getCharWidth(c);
-		}
-		
-		return width;
-	}
-	
-	public void search(final int val, double animationLength) {
-		drawTree();
-		
-		setButtonDisableToValue(true);
-		CheckBox ab = (CheckBox) controlPanel.lookup("#animButton");
-		
-		if (ab.isSelected()) {
-			searchWithAnimation(val, animationLength);
-		} else {
-			searchWithoutAnimation(val);
-		}
-	}
-	
-	/**
-	 * Searches for a Node without Animation.
-	 * @param val
-	 */
-	public void searchWithoutAnimation(int val) {
-		RBNode<Integer> node = tree.findNode(val);
-		if (node != tree.getSentinel()) {
-			// found node
-			Circle c = (Circle)lookup("#" + val);
-			c.setStroke(HIGHLIGHT);
-			console.setText("Found node with value " + val + ".");
-		} else {
-			// found nothing
-			console.setText("No such node with value " + val + ".");
-		}
-		setButtonDisableToValue(false);
-	}
-		
-	/**
-	 * Animates the Algorithm to find a Node in a RedBlack-Tree.
-	 * @param console The TextField giving information to the User.
-	 * @param val The Value the Users wants to find.
-	 * @param animationLength How long the PauseTransitions take.
-	 */
-	private void searchWithAnimation(final int val, double animationLength) {
-		Circle c;
-		SequentialTransition seq = new SequentialTransition();
-		PauseTransition p;
-		StrokeTransition st;
-		FadeTransition fd;
-		
-		final double strokeTimeInMillis = 10;
-		
-		RBNode<Integer> node = tree.getRoot();
-		RBNode<Integer>	sentinel = tree.getSentinel();
-		
-		while (node != sentinel) {
-			c = (Circle)lookup("#" + node.getKey());
-			
-			st = new StrokeTransition(Duration.millis(strokeTimeInMillis), c, NORMAL_BORDER, HIGHLIGHT);
-			seq.getChildren().add(st);
-			
-			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
-			final int nodeVal = node.getKey();
-			
-			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
-			p = new PauseTransition(Duration.seconds(animationLength));
-			if (node.getKey() == val) {
-				fd.setOnFinished(e -> {
-					console.setText("Found node with value " + val +"!");
-				});
-				seq.getChildren().add(fd);
-				break;
-			} else if (node.getKey() > val) {
-				fd.setOnFinished(e -> {
-					console.setText("Key " + nodeVal + " of this Node is bigger than " + val + " -> Go Left.");
-				});
-				node = node.getLeft();
-			} else {
-				fd.setOnFinished(e -> {
-					console.setText("Key " + nodeVal + " of this Node is smaller than " + val + " -> Go Right.");
-				});
-				node = node.getRight();
-			}
-			seq.getChildren().addAll(fd, p);
-		}
-		
-		if (node == sentinel) {
-			fd = new FadeTransition(Duration.millis(strokeTimeInMillis), console);
-			fd.setOnFinished(e -> {
-				console.setText("No such node with value " + val + ".");
-			});
-			seq.getChildren().add(fd);
-		}
-	
-		seq.play();
-		
-		seq.setOnFinished(e -> {
-			setButtonDisableToValue(false);
-		});
-	}
 	
 	/**
 	 * Disables or Enables all Control Buttons. 
@@ -779,8 +822,26 @@ public class TreePane extends Pane {
 		}
 	}
 	
-	public void test() {
-		ParallelTransition p = startAnimateRotation(75, RotationDirection.LEFT);
-		p.play();
+	/**
+	 * Helper Method. Sets Tree Height.
+	 * @param height
+	 */
+	private void setHeight(int height) {
+		this.height = height;
+	}
+	
+	/**
+	 * Helper Method. Gets Width of String.
+	 * @param s 
+	 * @return string width.
+	 */
+	private float getStringWidth(String s) {
+		float width = 0;
+		
+		for (char c : s.toCharArray()) {
+			width += fm.getCharWidth(c);
+		}
+		
+		return width;
 	}
 }
