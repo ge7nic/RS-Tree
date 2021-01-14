@@ -1,5 +1,8 @@
 package de.getto.nicolas.controller;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.sun.javafx.tk.FontMetrics;
 import com.sun.javafx.tk.Toolkit;
 
@@ -8,6 +11,8 @@ import de.getto.nicolas.node.RBNode;
 import de.getto.nicolas.tree.RedBlackTree;
 
 import javafx.animation.*;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -58,10 +63,10 @@ public class TreePane extends Pane {
 		tree = new RedBlackTree<Integer>();
 		setHeight(7);
 		
-		/*for (int i : STARTER_TREE) {
+		for (int i : STARTER_TREE) {
 			RBNode<Integer> node = new RBNode<Integer>(i);
 			tree.insertNodeBU(node);
-		}*/
+		}
 		drawTree();
 	}
 	
@@ -230,89 +235,154 @@ public class TreePane extends Pane {
 	}
 	
 	public SequentialTransition animateFixup(RBNode<Integer> node) {
+		final double animationLength = 3;
+		
 		SequentialTransition seq = new SequentialTransition();
 		
 		ParallelTransition par;
+		FadeTransition fade;
+		PauseTransition pause;
 		FillTransition fill;
 		Circle c;
 		
 		while (node != tree.getRoot() && node.getParent().getColor() == NodeColor.RED) {
 			par = new ParallelTransition();
+			final int val = node.getKey();
 			if (node.getParent() == node.getParent().getParent().getLeft()) {
-				// right side
 				RBNode<Integer> rightUncle = node.getParent().getParent().getRight();
 				if (rightUncle.getColor() == NodeColor.RED) {
 					// Case 1
+					fade = new FadeTransition(Duration.millis(10), console);
+					fade.setOnFinished(e -> {
+						console.setText("Since both " + val + " parent and uncle are red, we swap color's with their parent.");
+					});
+					pause = new PauseTransition(Duration.seconds(animationLength));
+					seq.getChildren().addAll(fade, pause);
+					
+					node.getParent().setColor(NodeColor.BLACK);
 					c = (Circle)lookup("#" + node.getParent().getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
 					par.getChildren().add(fill);
 					
+					rightUncle.setColor(NodeColor.BLACK);
 					c = (Circle)lookup("#" + rightUncle.getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
 					par.getChildren().add(fill);
 					
+					node.getParent().getParent().setColor(NodeColor.RED);
 					c = (Circle)lookup("#" + node.getParent().getParent().getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.RED);
 					par.getChildren().add(fill);
 					
 					node = node.getParent().getParent();
-					
 					seq.getChildren().add(par);
 				} else {
 					if (node == node.getParent().getRight()) {
 						// Case 2
 						node = node.getParent();
-						par.getChildren().add(startAnimateRotation(node.getKey(), RotationDirection.LEFT));
+						fade = new FadeTransition(Duration.millis(10), console);
+						fade.setOnFinished(e -> {
+							console.setText(val + " is the right child, so we rotate left pivoting it.");
+						});
+						pause = new PauseTransition(Duration.seconds(animationLength));
+						seq.getChildren().addAll(fade, pause);
+						tree.rotateLeft(node);
 					}
 					// Case 3
+					fade = new FadeTransition(Duration.millis(10), console);
+					fade.setOnFinished(e -> {
+						console.setText("Since only " + val + " parent is Red, we just swap colors with its parent.");
+					});
+					pause = new PauseTransition(Duration.seconds(animationLength));
+					seq.getChildren().addAll(fade, pause);
+					
+					node.getParent().setColor(NodeColor.BLACK);
 					c = (Circle)lookup("#" + node.getParent().getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
 					par.getChildren().add(fill);
 					
+					node.getParent().getParent().setColor(NodeColor.RED);
 					c = (Circle)lookup("#" + node.getParent().getParent().getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.RED);
 					par.getChildren().add(fill);
-					par.getChildren().add(startAnimateRotation(node.getParent().getParent().getKey(), RotationDirection.RIGHT));
 					
-					seq.getChildren().add(par);
+					final int ppVal = node.getParent().getParent().getKey();
+					fade = new FadeTransition(Duration.millis(10), console);
+					fade.setOnFinished(e -> {
+						console.setText("And now we just rotate right pivoting " + ppVal + " to correct the height.");
+					});
+					pause = new PauseTransition(Duration.seconds(animationLength));
+					tree.rotateRight(node.getParent().getParent());
+					
+					seq.getChildren().addAll(par, fade, pause);
 				}
 			} else {
-				// left side
 				RBNode<Integer> leftUncle = node.getParent().getParent().getLeft();
 				if (leftUncle.getColor() == NodeColor.RED) {
 					// Case 1
+					fade = new FadeTransition(Duration.millis(10), console);
+					fade.setOnFinished(e -> {
+						console.setText("Since both " + val + "'s parent and uncle are red, we swap color's with their parent.");
+					});
+					pause = new PauseTransition(Duration.seconds(animationLength));
+					seq.getChildren().addAll(fade, pause);
+					
+					node.getParent().setColor(NodeColor.BLACK);
 					c = (Circle)lookup("#" + node.getParent().getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
 					par.getChildren().add(fill);
 					
+					leftUncle.setColor(NodeColor.BLACK);
 					c = (Circle)lookup("#" + leftUncle.getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
 					par.getChildren().add(fill);
 					
+					node.getParent().getParent().setColor(NodeColor.RED);
 					c = (Circle)lookup("#" + node.getParent().getParent().getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.RED);
 					par.getChildren().add(fill);
 					
 					node = node.getParent().getParent();
-					
 					seq.getChildren().add(par);
 				} else {
 					if (node == node.getParent().getLeft()) {
 						// Case 2
 						node = node.getParent();
-						par.getChildren().add(startAnimateRotation(node.getKey(), RotationDirection.RIGHT));
+						fade = new FadeTransition(Duration.millis(10), console);
+						fade.setOnFinished(e -> {
+							console.setText(val + " is the left child, so we rotate left pivoting it.");
+						});
+						pause = new PauseTransition(Duration.seconds(animationLength));
+						seq.getChildren().addAll(fade, pause);
+						tree.rotateRight(node);
 					}
 					// Case 3
+					fade = new FadeTransition(Duration.millis(10), console);
+					fade.setOnFinished(e -> {
+						console.setText("Since only " + val + "'s parent is Red, we just swap colors with its parent.");
+					});
+					pause = new PauseTransition(Duration.seconds(animationLength));
+					seq.getChildren().addAll(fade, pause);
+					
+					node.getParent().setColor(NodeColor.BLACK);
 					c = (Circle)lookup("#" + node.getParent().getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
 					par.getChildren().add(fill);
 					
+					node.getParent().getParent().setColor(NodeColor.RED);
 					c = (Circle)lookup("#" + node.getParent().getParent().getKey());
 					fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.RED);
 					par.getChildren().add(fill);
-					par.getChildren().add(startAnimateRotation(node.getParent().getParent().getKey(), RotationDirection.LEFT));
 					
-					seq.getChildren().add(par);
+					final int ppVal = node.getParent().getParent().getKey();
+					fade = new FadeTransition(Duration.millis(10), console);
+					fade.setOnFinished(e -> {
+						console.setText("And now we just rotate left pivoting " + ppVal + " to correct the height.");
+					});
+					pause = new PauseTransition(Duration.seconds(animationLength));
+					tree.rotateLeft(node.getParent().getParent());
+					
+					seq.getChildren().addAll(par, fade, pause);
 				}
 			}
 		}
@@ -324,11 +394,10 @@ public class TreePane extends Pane {
 		return seq;
 	}
 	
-	public SequentialTransition startAnimateRotation(int val, RotationDirection dir) {
+	public ParallelTransition startAnimateRotation(int val, RotationDirection dir) {
 		RBNode<Integer> temp = tree.getRoot();
 		RBNode<Integer> node = tree.findNode(val);
 		double xMin = 0, xMax = getWidth(), yMin = 0, yMax = getHeight() / height;
-		
 		while(temp != tree.getSentinel()) {
 			if (temp.getKey() == val) {
 				// found
@@ -350,6 +419,7 @@ public class TreePane extends Pane {
 			}
 		}
 		// error
+		System.out.println("erro");
 		return null;
 	}
 	
@@ -366,16 +436,15 @@ public class TreePane extends Pane {
 	 * @param yMin yMin position of node
 	 * @param yMax yMax position of node
 	 */
-	public SequentialTransition animateRotateLeft(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+	public ParallelTransition animateRotateLeft(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+		System.out.println("Moving node " + node.getKey() + " left:" + xMin + ", " + xMax + ", " + yMin + ", " + yMax);
 		// Insert a Method to delete all edges in this subtree first. Maybe this looks better?
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle rightChild = (Circle)lookup("#" + node.getRight().getKey());
 		
 		TranslateTransition t1 = new TranslateTransition(Duration.seconds(1), nodeX.getParent());
 		TranslateTransition t2 = new TranslateTransition(Duration.seconds(1), rightChild.getParent());
-		SequentialTransition seq = new SequentialTransition();
 		ParallelTransition par = new ParallelTransition();
-		PauseTransition pt = new PauseTransition(Duration.seconds(1));
 		FadeTransition fd = new FadeTransition(Duration.millis(10), console);
 		
 		//go left so we can move nodeX there
@@ -395,66 +464,38 @@ public class TreePane extends Pane {
 		});
 		
 		par.getChildren().addAll(fd, t1, t2);
-		seq.getChildren().add(par);
-		
-		ParallelTransition par2;
+
 		// fix subtree alpha
 		// to fix alpha, we just move it down one level
 		if (node.getLeft() != tree.getSentinel()) {
-			// Helper-Text
-			pt = new PauseTransition(Duration.seconds(1));
-			fd = new FadeTransition(Duration.millis(10), console);
-			fd.setOnFinished(e -> {
-				console.setText("Since Subbtree alpha is not empty, we fix it.");
-			});
-			
-			par2 = new ParallelTransition();
-			par2 = moveSubtreeDown(node.getLeft(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
-			
-			par2.getChildren().add(fd);
-			seq.getChildren().addAll(pt, par2);
+			par = moveSubtreeDown(node.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 		}
 		// fix subtree beta
 		// to fix beta we move it to be the new right child of x and move it to that position
 		if (node.getRight().getLeft() != tree.getSentinel()) {
-			// Helper-Text
-			pt = new PauseTransition(Duration.seconds(1));
-			fd = new FadeTransition(Duration.millis(10), console);
-			fd.setOnFinished(e -> {
-				console.setText("Since Subbtree beta is not empty, we fix it.");
-			});
 			
-			par2 = new ParallelTransition();
 			// Even though node.getRight().getLeft() is the node we are moving, we want the ending position to be
 			// at node.getLeft().getRight()
-			par2 = moveSubtreeUp(node.getRight().getLeft(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
-			
-			par2.getChildren().add(fd);
-			seq.getChildren().addAll(pt, par2);
+			par = moveSubtreeUp(node.getRight().getLeft(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 		}
 		// fix subtree gamma
 		// to fix gamma all we have to do is move it up one level and set it as a child of the original node
 		// for that we have to move up one level again though
 		if (node.getRight().getRight() != tree.getSentinel()) {
-			// Helper-Text
-			pt = new PauseTransition(Duration.seconds(1));
-			fd = new FadeTransition(Duration.millis(10), console);
-			fd.setOnFinished(e -> {
-				console.setText("Since Subbtree Gamma is not empty, we fix it.");
-			});
-						
-			par2 = new ParallelTransition();
+
 			// go up one level again
 			xMax = 2 * xMax - xMin;
 			yMin = yMin - yMax;
-			par2 = moveSubtreeUp(node.getRight().getRight(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
-			
-			par2.getChildren().add(fd);
-			seq.getChildren().addAll(pt, par2);
+			par = moveSubtreeUp(node.getRight().getRight(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+
 		}
 
-		tree.rotateLeft(node);
-		return seq;
+		par.setOnFinished(e -> {
+			tree.rotateLeft(node);
+			drawTree();
+		});
+		
+		return par;
 	}
 	
 	/**
@@ -470,17 +511,16 @@ public class TreePane extends Pane {
 	 * @param yMin yMin position of node
 	 * @param yMax yMax position of node
 	 */
-	public SequentialTransition animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+	public ParallelTransition animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
+		System.out.println("Moving node " + node.getKey() + " right:" + xMin + ", " + xMax + ", " + yMin + ", " + yMax);
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle leftChild = (Circle)lookup("#" + node.getLeft().getKey());
-		
+
 		TranslateTransition t1 = new TranslateTransition(Duration.seconds(1), nodeX.getParent());
 		TranslateTransition t2 = new TranslateTransition(Duration.seconds(1), leftChild.getParent());
 		ParallelTransition par = new ParallelTransition();
-		SequentialTransition seq = new SequentialTransition();
-		PauseTransition pt = new PauseTransition(Duration.seconds(1));
 		FadeTransition fd = new FadeTransition(Duration.millis(10), console);
-		
+
 		//go right so we can move nodeX there
 		xMin = (xMin + xMax) / 2;
 		yMin = yMax + yMin;
@@ -498,62 +538,36 @@ public class TreePane extends Pane {
 		});
 				
 		par.getChildren().addAll(fd, t1, t2);
-		seq.getChildren().add(par);
 		
-		ParallelTransition par2;
 		// fix subtree gamma
 		// to fix gamma all we have to do is move it down one level
-		if (node.getRight() != tree.getSentinel()) {
-			// Helper-Text
-			pt = new PauseTransition(Duration.seconds(1));
-			fd = new FadeTransition(Duration.millis(10), console);
-			fd.setOnFinished(e -> {
-				console.setText("Since Subbtree Gamma is not empty, we fix it.");
-			});
-			
-			par2 = new ParallelTransition();
-			par2 = moveSubtreeDown(node.getRight(), par2, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
-			par2.getChildren().add(fd);
-			seq.getChildren().addAll(pt, par2);
+		if (node.getRight() != tree.getSentinel()) {			
+
+			par = moveSubtreeDown(node.getRight(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+
 		}
 		// fix subtree beta
 		// this also works symmetrically to left rotation
 		if (node.getLeft().getRight() != tree.getSentinel()) {
-			// Helper-Text
-			pt = new PauseTransition(Duration.seconds(1));
-			fd = new FadeTransition(Duration.millis(10), console);
-			fd.setOnFinished(e -> {
-				console.setText("Since Subbtree Beta is not empty, we fix it.");
-			});
-			
-			par2 = new ParallelTransition();
+
 			// Even though node.getLeft().getRight() is the node we are moving, we want the ending position to be
 			// at node.getRight().getLeft()
-			par2 = moveSubtreeUp(node.getLeft().getRight(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
-			par2.getChildren().add(fd);
-			seq.getChildren().addAll(pt, par2);
+			par = moveSubtreeUp(node.getLeft().getRight(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 		}
 		// fix subtree alpha
 		// to fix alpha we do it symetrically to fix gamma in a left rotation
-		if (node.getLeft().getLeft() != tree.getSentinel()) {
-			// Helper-Text
-			pt = new PauseTransition(Duration.seconds(1));
-			fd = new FadeTransition(Duration.millis(10), console);
-			fd.setOnFinished(e -> {
-				console.setText("Since Subbtree Alpha is not empty, we fix it.");
-			});
-						
-			par2 = new ParallelTransition();
+		if (node.getLeft().getLeft() != tree.getSentinel()) {		
 			// go up one level again
 			xMin = 2 * xMin - xMax;
 			yMin = yMin - yMax;
-			par2 = moveSubtreeUp(node.getLeft().getLeft(), par2, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
-			par2.getChildren().add(fd);
-			seq.getChildren().addAll(pt, par2);
+			par = moveSubtreeUp(node.getLeft().getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 		}
 
-		tree.rotateRight(node);
-		return seq;
+		par.setOnFinished(e -> {
+			tree.rotateRight(node);
+			drawTree();
+		});
+		return par;
 	}
 	
 	/**
@@ -747,6 +761,13 @@ public class TreePane extends Pane {
 	}
 	
 	public void test() {
-		System.out.println(tree.findNode(18).getKey() + " " + tree.findNode(18).getParent().getKey() + " " + tree.findNode(18).getLeft().getKey() + " " + tree.findNode(18).getRight().getKey());
+		SequentialTransition seq = new SequentialTransition();
+		PauseTransition pause = new PauseTransition(Duration.seconds(1));
+		ParallelTransition par1 = startAnimateRotation(11, RotationDirection.RIGHT);
+		ParallelTransition par2 = startAnimateRotation(11, RotationDirection.LEFT);
+		seq.getChildren().addAll(par1, pause, par2);
+		
+		seq.setRate(1);
+		seq.play();
 	}
 }

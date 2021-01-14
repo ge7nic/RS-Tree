@@ -78,6 +78,7 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
+		
 		treePane.test();
 	}
 }
