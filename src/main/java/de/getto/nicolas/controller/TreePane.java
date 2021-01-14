@@ -32,7 +32,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {6, 3, 11, 1, 5, 8, 17, 0, 2, 4, 7, 9, 16, 20, 15};
+	private static final int[] STARTER_TREE = {50, 25, 75, 20, 80};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -49,12 +49,16 @@ public class TreePane extends Pane {
 	private TranslateTransition tempt;
 	private Circle subtreeTempCircle;
 	
+	private double translateXForLeftRotationProp;
+	
 	public TreePane(HBox controlPanel, TextField console) {
 		widthProperty().addListener(evt -> drawTree());
 		heightProperty().addListener(evt -> drawTree());
 		
 		this.controlPanel = controlPanel;
 		this.console = console;
+		
+		translateXForLeftRotationProp = 0;
 		
 		createTree();
 	}
@@ -63,10 +67,10 @@ public class TreePane extends Pane {
 		tree = new RedBlackTree<Integer>();
 		setHeight(7);
 		
-		/*for (int i : STARTER_TREE) {
+		for (int i : STARTER_TREE) {
 			RBNode<Integer> node = new RBNode<Integer>(i);
 			tree.insertNodeBU(node);
-		}*/
+		}
 		drawTree();
 	}
 	
@@ -222,6 +226,7 @@ public class TreePane extends Pane {
 		
 		getChildren().add(g);
 		
+		
 		seq.getChildren().add(animateFixup(insertNode));
 		seq.play();
 		
@@ -232,6 +237,10 @@ public class TreePane extends Pane {
 		});
 	}
 	
+	// animates the fixup || Both Case 2 have an animation error, because two rotations want to be
+	// displayed in one method call - This leads to the second rotatation animation not being displayed
+	
+	// To fix it, we have to remember xMin, xMax, yMin and yMax of the nodes (maybe) 
 	public SequentialTransition animateFixup(RBNode<Integer> node) {
 		final double animationLength = 3;
 		
@@ -245,11 +254,11 @@ public class TreePane extends Pane {
 		
 		while (node != tree.getRoot() && node.getParent().getColor() == NodeColor.RED) {
 			par = new ParallelTransition();
-			final int val = node.getKey();
 			if (node.getParent() == node.getParent().getParent().getLeft()) {
 				RBNode<Integer> rightUncle = node.getParent().getParent().getRight();
 				if (rightUncle.getColor() == NodeColor.RED) {
 					// Case 1
+					final int val = node.getKey();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
 						console.setText("Since both " + val + " parent and uncle are red, we swap color's with their parent.");
@@ -277,17 +286,22 @@ public class TreePane extends Pane {
 				} else {
 					if (node == node.getParent().getRight()) {
 						// Case 2
-						node = node.getParent();
+						final int val = node.getKey();
 						fade = new FadeTransition(Duration.millis(10), console);
 						fade.setOnFinished(e -> {
-							console.setText(val + " is the right child, so we rotate left pivoting it.");
+							console.setText(val + " is the right child, so we rotate left pivoting its parent.");
 						});
 						pause = new PauseTransition(Duration.seconds(animationLength));
+						
+						node = node.getParent();
 						seq.getChildren().addAll(fade, pause,
 								startAnimateRotation(node.getKey(), RotationDirection.LEFT));
 						tree.rotateLeft(node);
+						pause = new PauseTransition(Duration.seconds(animationLength));
+						seq.getChildren().add(pause);
 					}
 					// Case 3
+					final int val = node.getKey();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
 						console.setText("Since only " + val + " parent is Red, we just swap colors with its parent.");
@@ -320,6 +334,7 @@ public class TreePane extends Pane {
 				RBNode<Integer> leftUncle = node.getParent().getParent().getLeft();
 				if (leftUncle.getColor() == NodeColor.RED) {
 					// Case 1
+					final int val = node.getKey();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
 						console.setText("Since both " + val + "'s parent and uncle are red, we swap color's with their parent.");
@@ -347,17 +362,22 @@ public class TreePane extends Pane {
 				} else {
 					if (node == node.getParent().getLeft()) {
 						// Case 2
-						node = node.getParent();
+						final int val = node.getKey();
 						fade = new FadeTransition(Duration.millis(10), console);
 						fade.setOnFinished(e -> {
-							console.setText(val + " is the left child, so we rotate left pivoting it.");
+							console.setText(val + " is the left child, so we rotate right pivoting its parent.");
 						});
+						
+						node = node.getParent();
 						pause = new PauseTransition(Duration.seconds(animationLength));
 						seq.getChildren().addAll(fade, pause,
 								startAnimateRotation(node.getKey(), RotationDirection.RIGHT));
+						pause = new PauseTransition(Duration.seconds(animationLength));
+						seq.getChildren().add(pause);
 						tree.rotateRight(node);
 					}
 					// Case 3
+					final int val = node.getKey();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
 						console.setText("Since only " + val + "'s parent is Red, we just swap colors with its parent.");
@@ -385,6 +405,8 @@ public class TreePane extends Pane {
 					seq.getChildren().addAll(par, fade, pause, 
 							startAnimateRotation(node.getParent().getParent().getKey(), RotationDirection.LEFT));
 					tree.rotateLeft(node.getParent().getParent());
+					pause = new PauseTransition(Duration.seconds(animationLength));
+					seq.getChildren().add(pause);
 				}
 			}
 		}
@@ -393,7 +415,7 @@ public class TreePane extends Pane {
 		fade.setOnFinished(e -> {
 			console.setText("To finish, we just repaint the root black and paint the edges.");
 		});
-		pause = new PauseTransition(Duration.seconds(animationLength));
+		pause = new PauseTransition(Duration.seconds(0.5));
 		
 		c = (Circle)lookup("#" + tree.getRoot().getKey());
 		fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
@@ -406,14 +428,18 @@ public class TreePane extends Pane {
 	public ParallelTransition startAnimateRotation(int val, RotationDirection dir) {
 		RBNode<Integer> temp = tree.getRoot();
 		RBNode<Integer> node = tree.findNode(val);
+		ParallelTransition par = new ParallelTransition();
+		
 		double xMin = 0, xMax = getWidth(), yMin = 0, yMax = getHeight() / height;
 		while(temp != tree.getSentinel()) {
 			if (temp.getKey() == val) {
 				// found
 				if (dir == RotationDirection.LEFT) {
-					return animateRotateLeft(node, dir, xMin, xMax, yMin, yMax);
+					par = animateRotateLeft(node, dir, xMin, xMax, yMin, yMax);
+					break;
 				} else {
-					return animateRotateRight(node, dir, xMin, xMax, yMin, yMax);
+					par = animateRotateRight(node, dir, xMin, xMax, yMin, yMax);
+					break;
 				}
 			} else if (temp.getKey() > val) {
 				// go left
@@ -428,8 +454,7 @@ public class TreePane extends Pane {
 			}
 		}
 		// error
-		System.out.println("erro");
-		return null;
+		return par;
 	}
 	
 	/**
@@ -455,16 +480,20 @@ public class TreePane extends Pane {
 		ParallelTransition par = new ParallelTransition();
 		FadeTransition fd = new FadeTransition(Duration.millis(10), console);
 		
+		//pos for right Child
+		double layoutChildX = ((xMin + xMax) / 2);
+		double layoutChildY = yMin + yMax / 2;
+		
 		//go left so we can move nodeX there
 		xMax = (xMin + xMax) / 2;
 		yMin = yMin + yMax;
 		double layoutLeftX = ((xMin + xMax) / 2);
 		double layoutLeftY = yMin + yMax / 2;
 		
-		t1.setByX(-Math.abs(nodeX.getParent().getLayoutX() - layoutLeftX));
-		t1.setByY(Math.abs(nodeX.getParent().getLayoutY() - layoutLeftY));
-		t2.setByX(-Math.abs(rightChild.getParent().getLayoutX() - nodeX.getParent().getLayoutX()));
-		t2.setByY(-Math.abs(rightChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
+		t1.setToX(-Math.abs(nodeX.getParent().getLayoutX() - layoutLeftX));
+		t1.setToY(Math.abs(nodeX.getParent().getLayoutY() - layoutLeftY));
+		t2.setToX(-Math.abs(rightChild.getParent().getLayoutX() - layoutChildX));
+		t2.setToY(-Math.abs(rightChild.getParent().getLayoutY() - layoutChildY));
 		
 		// Helper-Text for the first step
 		final int val = node.getKey();
@@ -482,7 +511,6 @@ public class TreePane extends Pane {
 		// fix subtree beta
 		// to fix beta we move it to be the new right child of x and move it to that position
 		if (node.getRight().getLeft() != tree.getSentinel()) {
-			
 			// Even though node.getRight().getLeft() is the node we are moving, we want the ending position to be
 			// at node.getLeft().getRight()
 			par = moveSubtreeUp(node.getRight().getLeft(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
@@ -491,21 +519,16 @@ public class TreePane extends Pane {
 		// to fix gamma all we have to do is move it up one level and set it as a child of the original node
 		// for that we have to move up one level again though
 		if (node.getRight().getRight() != tree.getSentinel()) {
-
 			// go up one level again
 			xMax = 2 * xMax - xMin;
 			yMin = yMin - yMax;
 			par = moveSubtreeUp(node.getRight().getRight(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 
 		}
-
-		par.setOnFinished(e -> {
-			drawTree();
-		});
 		
 		return par;
 	}
-	
+
 	/**
 	 * Method that animates a rotation to the right around a node.
 	 * This Method should only be called if the left child of node is NOT null, otherwise it will crash.
@@ -520,14 +543,12 @@ public class TreePane extends Pane {
 	 * @param yMax yMax position of node
 	 */
 	public ParallelTransition animateRotateRight(RBNode<Integer> node, RotationDirection dir, double xMin, double xMax, double yMin, double yMax) {
-		System.out.println("Moving node " + node.getKey() + " right:" + xMin + ", " + xMax + ", " + yMin + ", " + yMax);
 		Circle nodeX = (Circle)lookup("#" + node.getKey());
 		Circle leftChild = (Circle)lookup("#" + node.getLeft().getKey());
 
 		TranslateTransition t1 = new TranslateTransition(Duration.seconds(1), nodeX.getParent());
 		TranslateTransition t2 = new TranslateTransition(Duration.seconds(1), leftChild.getParent());
 		ParallelTransition par = new ParallelTransition();
-		FadeTransition fd = new FadeTransition(Duration.millis(10), console);
 
 		//go right so we can move nodeX there
 		xMin = (xMin + xMax) / 2;
@@ -535,23 +556,17 @@ public class TreePane extends Pane {
 		double layoutRightX = ((xMin + xMax) / 2);
 		double layoutRightY = yMin + yMax / 2;
 		
-		t1.setByX(Math.abs(nodeX.getParent().getLayoutX() - layoutRightX));
-		t1.setByY(Math.abs(nodeX.getParent().getLayoutY() - layoutRightY));
-		t2.setByX(Math.abs(leftChild.getParent().getLayoutX() - nodeX.getParent().getLayoutX()));
-		t2.setByY(-Math.abs(leftChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
+		t1.setToX(Math.abs(nodeX.getParent().getLayoutX() - layoutRightX));
+		t1.setToY(Math.abs(nodeX.getParent().getLayoutY() - layoutRightY));
+		t2.setToX(Math.abs(leftChild.getParent().getLayoutX() - nodeX.getParent().getLayoutX()));
+		t2.setToY(-Math.abs(leftChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
 		
-		// Helper-Text for the first step
-		final int val = node.getKey();
-		fd.setOnFinished(e -> {
-			console.setText("We rotate " + val + " and it's left Child to the right.");
-		});
-				
-		par.getChildren().addAll(fd, t1, t2);
+			
+		par.getChildren().addAll(t1, t2);
 		
 		// fix subtree gamma
 		// to fix gamma all we have to do is move it down one level
 		if (node.getRight() != tree.getSentinel()) {			
-
 			par = moveSubtreeDown(node.getRight(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 
 		}
@@ -572,9 +587,6 @@ public class TreePane extends Pane {
 			par = moveSubtreeUp(node.getLeft().getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 		}
 
-		par.setOnFinished(e -> {
-			drawTree();
-		});
 		return par;
 	}
 	
@@ -591,9 +603,7 @@ public class TreePane extends Pane {
 	 */
 	private ParallelTransition moveSubtreeDown(RBNode<Integer> x, ParallelTransition par, RotationDirection dir,
 			double xMin, double xMax, double yMin, double yMax) {
-		if (x != tree.getSentinel()) {
-			moveSubtreeDown(x.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
-			
+		if (x != tree.getSentinel()) {			
 			//work
 			subtreeTempCircle = (Circle)lookup("#" + x.getKey());
 			tempt = new TranslateTransition(Duration.seconds(1), subtreeTempCircle.getParent());
@@ -605,6 +615,7 @@ public class TreePane extends Pane {
 			tempt.setByY(Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
 			par.getChildren().add(tempt);
 			
+			moveSubtreeDown(x.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 			moveSubtreeDown(x.getRight(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 		}
 		return par;
@@ -624,7 +635,6 @@ public class TreePane extends Pane {
 	private ParallelTransition moveSubtreeUp(RBNode<Integer> x, ParallelTransition par, RotationDirection dir,
 			double xMin, double xMax, double yMin, double yMax) {
 		if (x != tree.getSentinel()) {
-			moveSubtreeUp(x.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 			// work
 			subtreeTempCircle = (Circle)lookup("#" + x.getKey());
 			tempt = new TranslateTransition(Duration.seconds(1), subtreeTempCircle.getParent());
@@ -636,6 +646,7 @@ public class TreePane extends Pane {
 			tempt.setByY(-Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
 			par.getChildren().add(tempt);
 			
+			moveSubtreeUp(x.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
 			moveSubtreeUp(x.getRight(), par, dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 		}
 		return par;
@@ -769,13 +780,7 @@ public class TreePane extends Pane {
 	}
 	
 	public void test() {
-		SequentialTransition seq = new SequentialTransition();
-		PauseTransition pause = new PauseTransition(Duration.seconds(1));
-		ParallelTransition par1 = startAnimateRotation(11, RotationDirection.RIGHT);
-		ParallelTransition par2 = startAnimateRotation(11, RotationDirection.LEFT);
-		seq.getChildren().addAll(par1, pause, par2);
-		
-		seq.setRate(1);
-		seq.play();
+		ParallelTransition p = startAnimateRotation(75, RotationDirection.LEFT);
+		p.play();
 	}
 }
