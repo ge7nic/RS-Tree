@@ -608,11 +608,11 @@ public class TreePane extends Pane {
 			subtreeTempCircle = (Circle)lookup("#" + x.getKey());
 			tempt = new TranslateTransition(Duration.seconds(1), subtreeTempCircle.getParent());
 			if (dir == RotationDirection.LEFT) {
-				tempt.setByX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+				tempt.setToX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
 			} else {
-				tempt.setByX(Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+				tempt.setToX(Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
 			}
-			tempt.setByY(Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
+			tempt.setToY(Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
 			par.getChildren().add(tempt);
 			
 			moveSubtreeDown(x.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
@@ -639,11 +639,11 @@ public class TreePane extends Pane {
 			subtreeTempCircle = (Circle)lookup("#" + x.getKey());
 			tempt = new TranslateTransition(Duration.seconds(1), subtreeTempCircle.getParent());
 			if (dir == RotationDirection.LEFT) {
-				tempt.setByX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+				tempt.setToX(-Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
 			} else {
-				tempt.setByX(Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
+				tempt.setToX(Math.abs(subtreeTempCircle.getParent().getLayoutX() - ((xMin + xMax) / 2)));
 			}
-			tempt.setByY(-Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
+			tempt.setToY(-Math.abs(subtreeTempCircle.getParent().getLayoutY() - (yMin + yMax / 2)));
 			par.getChildren().add(tempt);
 			
 			moveSubtreeUp(x.getLeft(), par, dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
