@@ -23,6 +23,8 @@ public class UIController {
 	
 	private TreePane treePane;
 	
+	private static final int ANIMATION_LENGTH = 2;
+	
 	public void initialize() {
 		treePane = new TreePane(hBox, console);
 		
@@ -40,7 +42,7 @@ public class UIController {
 				newAlert.showAndWait();
 				return;
 			}
-			treePane.insert(newVal, 2);
+			treePane.insert(newVal, ANIMATION_LENGTH);
 		} catch (NumberFormatException e) {
 			Alert newAlert = new Alert(Alert.AlertType.ERROR, input + " is not a valid number.");
 			newAlert.showAndWait();
@@ -53,7 +55,7 @@ public class UIController {
 		
 		try {
 			int newVal = Integer.valueOf(input);
-			treePane.delete(newVal);
+			treePane.delete(newVal, ANIMATION_LENGTH);
 		} catch (NumberFormatException e) {
 			Alert newAlert = new Alert(Alert.AlertType.ERROR, input + " is not a valid number.");
 			newAlert.showAndWait();
@@ -66,7 +68,7 @@ public class UIController {
 		
 		try {
 			int newVal = Integer.valueOf(input);
-			treePane.search(newVal, 2);
+			treePane.search(newVal, ANIMATION_LENGTH);
 		} catch (NumberFormatException e) {
 			Alert newAlert = new Alert(Alert.AlertType.ERROR, input + " is not a valid number.");
 			newAlert.showAndWait();

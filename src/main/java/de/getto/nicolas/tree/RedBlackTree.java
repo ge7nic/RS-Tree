@@ -63,6 +63,10 @@ public class RedBlackTree<T extends Comparable<T>> {
 		return sentinel;
 	}
 	
+	/**
+	 * If this method is called, insertNodeBUFixup is always going to be used.
+	 * @param node
+	 */
 	public void insertNodeBU(RBNode<T> node) {
 		insertNodeBU(node, true);
 	}
@@ -224,8 +228,6 @@ public class RedBlackTree<T extends Comparable<T>> {
 	private void deleteNodeFixup(RBNode<T> node) {
 		RBNode<T> w;
 		while (node != root && node.getColor() == NodeColor.BLACK) {
-
-			System.out.println("called.");
 			if (node == node.getParent().getLeft()) {
 				w = node.getParent().getRight();
 				if (w.getColor() == NodeColor.RED) {
@@ -295,7 +297,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 	 * @param node root of subtree
 	 * @return the direct successor node, marking the root of the subtree.
 	 */
-	private RBNode<T> getTreeSuccessor(RBNode<T> node) {
+	public RBNode<T> getTreeSuccessor(RBNode<T> node) {
 		if (node.getRight() != sentinel) {
 			return getTreeMinimum(node.getRight());
 		}

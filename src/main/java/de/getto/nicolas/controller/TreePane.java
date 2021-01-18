@@ -175,7 +175,7 @@ public class TreePane extends Pane {
 		}
 	}
 	
-	public void delete(int val) {
+	public void delete(int val, double animationLength) {
 		if (tree.findNode(val) == tree.getSentinel()) {
 			console.setStyle("-fx-text-fill: red;");
 			console.setText("A node with the value " + val + " does not exists!");
@@ -187,7 +187,7 @@ public class TreePane extends Pane {
 		drawTree();
 		setButtonDisableToValue(true);
 		if (ab.isSelected()) {
-			// animate deletion
+			deleteWithAnimation(val, animationLength);
 		} else {
 			deleteWithoutAnimation(val);
 		}
@@ -277,7 +277,7 @@ public class TreePane extends Pane {
 		getChildren().add(g);
 		
 		
-		seq.getChildren().add(animateFixup(insertNode, animationLength));
+		seq.getChildren().add(animateInsertFixup(insertNode, animationLength));
 		seq.play();
 		
 		seq.setOnFinished(e -> {
@@ -305,9 +305,42 @@ public class TreePane extends Pane {
 		drawTree();
 		setButtonDisableToValue(false);
 	}
-	
+
+	// x is the node to be deleted
 	private void deleteWithAnimation(int val, double animationLength) {
+		RBNode<Integer> tempNode = tree.getRoot();
 		
+		// needed transitions for animation
+		SequentialTransition seq = new SequentialTransition();
+		
+		// find pos of x
+		double xMin = 0, xMax = widthProperty().get(), yMin = 0, yMax = heightProperty().get() / height;
+		
+		while (tempNode.getKey() != val) {
+			if (val < tempNode.getKey()) {
+				xMax = (xMin + xMax) / 2;
+				yMin = yMin + yMax;
+				
+				tempNode = tempNode.getLeft();
+			} else {
+				xMin = (xMin + xMax) / 2;
+				yMin = yMin + yMax;
+				
+				tempNode = tempNode.getRight();
+			}
+		}
+		
+		// we now have the min/max values of the position of x
+		// we animate the first Step
+		seq.getChildren().add(animateDeleteFirstStep(tempNode, animationLength, xMin, xMax, yMin, yMax));
+		
+		// we animate the fixup
+		
+		// we play the animation and clean up
+		seq.play();
+		seq.setOnFinished(e -> {
+			setButtonDisableToValue(false);
+		});
 	}
 	
 	/**
@@ -407,7 +440,7 @@ public class TreePane extends Pane {
 	 * @param node Node that got added.
 	 * @return The Animation that plays the Tree Fix.
 	 */
-	private SequentialTransition animateFixup(RBNode<Integer> node, double animationLength) {
+	private SequentialTransition animateInsertFixup(RBNode<Integer> node, double animationLength) {
 		
 		SequentialTransition seq = new SequentialTransition();
 		
@@ -580,6 +613,60 @@ public class TreePane extends Pane {
 		fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
 		seq.getChildren().addAll(fade, pause, fill);
 		tree.getRoot().setColor(NodeColor.BLACK);
+		
+		return seq;
+	}
+	
+	/**
+	 * Helper Method to animate the first step of deletion.
+	 * @param tempNode The node that is to be deleted. At this point in execution, this node will exist.
+	 * @param animationLength Pause length.
+	 * @param xMin value of tempNode
+	 * @param xMax value of tempNode.
+	 * @param yMin value of tempNode.
+	 * @param yMax value of tempNode
+	 * @return The Animation of the first step. 
+	 */
+	private SequentialTransition animateDeleteFirstStep(RBNode<Integer> tempNode, double animationLength,
+			double xMin, double xMax, double yMin, double yMax) {
+		SequentialTransition seq = new SequentialTransition();
+		FadeTransition fade;
+		PauseTransition pause;
+		StrokeTransition st;
+		
+		RBNode<Integer> toSpliceOut;
+		final int val = tempNode.getKey();
+		
+		// We set the node that is to be spliced out - Either the node itself, or it's successor
+		if (tempNode.getRight() == tree.getSentinel() || tempNode.getLeft() == tree.getSentinel()) {
+			// we splice out the node itself, because it has one child max
+			toSpliceOut = tempNode;
+			Circle c = (Circle)lookup("#" + toSpliceOut.getKey());
+			
+			fade = new FadeTransition(Duration.millis(10), console);
+			fade.setOnFinished(e -> {
+				console.setText("Since " + val + " doesn't have two Children, we can just splice it out.");
+			});
+			st = new StrokeTransition(Duration.millis(10), c, (Color)c.getStroke(), HIGHLIGHT);
+			pause = new PauseTransition(Duration.seconds(animationLength));
+		} else {
+			// we replace this node with the successor node, because it has two children
+			toSpliceOut = tree.getTreeSuccessor(tempNode);
+			final int succVal = toSpliceOut.getKey();
+			Circle c = (Circle)lookup("#" + succVal);
+			
+			// we splice out the node itself, because it has one child max
+			fade = new FadeTransition(Duration.millis(10), console);
+			fade.setOnFinished(e -> {
+				console.setText("Since " + val + " has two Children, we replace it with it's successor " + succVal + ".");
+			});
+			st = new StrokeTransition(Duration.millis(10), c, (Color)c.getStroke(), HIGHLIGHT);
+			pause = new PauseTransition(Duration.seconds(animationLength));
+		}
+		seq.getChildren().addAll(fade, st, pause);
+		
+		// If the left child of toSpliceOut exists, we set it here. Otherwise we set the right child, which could be sentinel
+		
 		
 		return seq;
 	}
