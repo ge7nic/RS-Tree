@@ -26,7 +26,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {50, 25, 75, 20, 80};
+	private static final int[] STARTER_TREE = {15, 10, 20, 17, 25, 12, 36, 89, 102, 5, 14};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -308,39 +308,13 @@ public class TreePane extends Pane {
 
 	// x is the node to be deleted
 	private void deleteWithAnimation(int val, double animationLength) {
-		RBNode<Integer> tempNode = tree.getRoot();
+		RBNode<Integer> tempNode = tree.findNode(val);
 		
 		// needed transitions for animation
 		SequentialTransition seq = new SequentialTransition();
+
+		seq.getChildren().add(animateDeletion(tempNode, animationLength, 0, widthProperty().get(), 0, heightProperty().get() / height));
 		
-		// find pos of x
-		double xMin = 0, xMax = widthProperty().get(), yMin = 0, yMax = heightProperty().get() / height;
-		
-		while (tempNode.getKey() != val) {
-			if (val < tempNode.getKey()) {
-				xMax = (xMin + xMax) / 2;
-				yMin = yMin + yMax;
-				
-				tempNode = tempNode.getLeft();
-			} else {
-				xMin = (xMin + xMax) / 2;
-				yMin = yMin + yMax;
-				
-				tempNode = tempNode.getRight();
-			}
-		}
-		
-		// we now have the min/max values of the position of x
-		// we animate the first Step
-		seq.getChildren().add(animateDeleteFirstStep(tempNode, animationLength, xMin, xMax, yMin, yMax));
-		
-		// we animate the fixup
-		
-		// we play the animation and clean up
-		seq.play();
-		seq.setOnFinished(e -> {
-			setButtonDisableToValue(false);
-		});
 	}
 	
 	/**
@@ -627,14 +601,17 @@ public class TreePane extends Pane {
 	 * @param yMax value of tempNode
 	 * @return The Animation of the first step. 
 	 */
-	private SequentialTransition animateDeleteFirstStep(RBNode<Integer> tempNode, double animationLength,
+	private SequentialTransition animateDeletion(RBNode<Integer> tempNode, double animationLength,
 			double xMin, double xMax, double yMin, double yMax) {
 		SequentialTransition seq = new SequentialTransition();
 		FadeTransition fade;
 		PauseTransition pause;
 		StrokeTransition st;
+		TranslateTransition translate;
+		ParallelTransition parallel;
 		
 		RBNode<Integer> toSpliceOut;
+		RBNode<Integer> childOfToSpliceOut;
 		final int val = tempNode.getKey();
 		
 		// We set the node that is to be spliced out - Either the node itself, or it's successor
@@ -655,7 +632,6 @@ public class TreePane extends Pane {
 			final int succVal = toSpliceOut.getKey();
 			Circle c = (Circle)lookup("#" + succVal);
 			
-			// we splice out the node itself, because it has one child max
 			fade = new FadeTransition(Duration.millis(10), console);
 			fade.setOnFinished(e -> {
 				console.setText("Since " + val + " has two Children, we replace it with it's successor " + succVal + ".");
@@ -664,11 +640,103 @@ public class TreePane extends Pane {
 			pause = new PauseTransition(Duration.seconds(animationLength));
 		}
 		seq.getChildren().addAll(fade, st, pause);
+
+		childOfToSpliceOut = toSpliceOut.getLeft() != tree.getSentinel() ?
+				toSpliceOut.getLeft() : toSpliceOut.getRight();
+		RBNode<Integer> pastParent = childOfToSpliceOut.getParent();
 		
-		// If the left child of toSpliceOut exists, we set it here. Otherwise we set the right child, which could be sentinel
+		childOfToSpliceOut.setParent(toSpliceOut.getParent());
+		// get coordinates of toSpliceOut
+		double[] spliceOutCoord = findNodePosValues(toSpliceOut.getKey());
+		xMin = spliceOutCoord[0];
+		xMax = spliceOutCoord[1];
+		yMin = spliceOutCoord[2];
+		yMax = spliceOutCoord[3];
 		
+		if (toSpliceOut.getParent() == tree.getSentinel()) {
+			// toSpliceOut is root, childOfToSpliceOut is either its only child or null
+			tree.setRoot(childOfToSpliceOut);
+			
+			if (childOfToSpliceOut != tree.getSentinel()) {
+				Circle c = (Circle)lookup("#" + childOfToSpliceOut.getKey());
+				// copy the new node over
+				fade = new FadeTransition(Duration.millis(10), console);
+				fade.setOnFinished(e -> {
+					console.setText("Since " + toSpliceOut.getKey() + " has an only child " + childOfToSpliceOut.getKey() + ", it is the new root.");
+				});
+				pause = new PauseTransition(Duration.seconds(animationLength));
+				
+				translate = new TranslateTransition(Duration.seconds(1), c.getParent());
+				translate.setToX(((xMin + xMax) / 2) - c.getParent().getLayoutX());
+				translate.setToY((yMin + yMax / 2) - c.getParent().getLayoutY());
+				
+				translate.setOnFinished(e -> {
+					getChildren().remove(((Circle)lookup("#" + toSpliceOut.getKey())).getParent());
+				});
+				
+				seq.getChildren().addAll(fade, translate, pause);
+			}
+		} else if (toSpliceOut == toSpliceOut.getParent().getLeft()) {
+			// toSpliceOut is in the left subtree
+			toSpliceOut.getParent().setLeft(childOfToSpliceOut);
+		} else {
+			// toSpliceOut is in the right subtree
+			toSpliceOut.getParent().setRight(childOfToSpliceOut);
+		}
+		
+		parallel = new ParallelTransition();
+		
+		// We replace the spliced out node and move it to it's correct place
+		if (toSpliceOut != tempNode) {
+			Circle c = (Circle)lookup("#" + toSpliceOut.getKey());
+			Circle dest = (Circle)lookup("#" + tempNode.getKey());
+			translate = new TranslateTransition(Duration.seconds(1), c.getParent());
+			translate.setToX(dest.getParent().getLayoutX() - c.getParent().getLayoutX());
+			translate.setToY(dest.getParent().getLayoutY() - c.getParent().getLayoutY());
+			
+			parallel.getChildren().add(translate);
+		}
+		
+		// If a subtree exists, we move it up
+		if (childOfToSpliceOut != tree.getSentinel()) {
+			double[] childPos = findNodePosValues(childOfToSpliceOut.getKey());
+			RotationDirection dir = pastParent.getRight() == childOfToSpliceOut ? 
+					RotationDirection.LEFT : RotationDirection.RIGHT;
+			parallel.getChildren().add(moveSubtreeUp(childOfToSpliceOut, parallel, dir,
+					childPos[0], childPos[1], childPos[2], childPos[3]));
+		}
+
+		getChildren().remove(((Circle)lookup("#" + tempNode.getKey())).getParent());
+		
+		seq.getChildren().addAll(parallel);
+		
+		if (toSpliceOut != tempNode) {
+			tempNode.setKey(toSpliceOut.getKey());
+		}
+		
+		seq.play();
+		seq.setOnFinished(e -> {
+			drawTree();
+			if (toSpliceOut.getColor() == NodeColor.BLACK) {
+				// repair here
+				animateDeleteFixup();
+			}
+		});
+
 		
 		return seq;
+	}
+	
+	// Second Approach, in which the first step is animated, and THEN the fixup is, instead of both in one Animation.
+	private void animateDeleteFixup() {
+		SequentialTransition seq = new SequentialTransition();
+		
+		seq.play();
+		seq.setOnFinished(e -> {
+			// cleanup
+			drawTree();
+			setButtonDisableToValue(false);
+		});
 	}
 	
 	/**
@@ -806,7 +874,6 @@ public class TreePane extends Pane {
 		t1.setToY(Math.abs(nodeX.getParent().getLayoutY() - layoutRightY));
 		t2.setToX(Math.abs(leftChild.getParent().getLayoutX() - nodeX.getParent().getLayoutX()));
 		t2.setToY(-Math.abs(leftChild.getParent().getLayoutY() - nodeX.getParent().getLayoutY()));
-		
 			
 		par.getChildren().addAll(t1, t2);
 		
@@ -931,4 +998,31 @@ public class TreePane extends Pane {
 		
 		return width;
 	}
+	
+	/**
+	 * Find Node pos values xMin, xMax, yMin, yMax for the node with the value val.
+	 * @param val value to find
+	 * @return Pos Values
+	 */
+	private double[] findNodePosValues(int val) {
+		double xMin = 0, xMax = widthProperty().get(), yMin = 0, yMax = heightProperty().get() / height;
+		RBNode<Integer> temp = tree.getRoot();
+		
+		while (temp != tree.getSentinel()) {
+			if (temp.getKey() == val) {
+				double[] ret = {xMin, xMax, yMin, yMax};
+				return ret;
+			} else if (temp.getKey() > val) {
+				xMax = (xMin + xMax) / 2;
+				yMin = yMin + yMax;
+				temp = temp.getLeft();
+			} else {
+				xMin = (xMin + xMax) / 2;
+				yMin = yMin + yMax;
+				temp = temp.getRight();
+			}
+		}
+		return null; 
+	}
+	
 }

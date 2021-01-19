@@ -214,6 +214,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 			node.setKey(y.getKey());
 			// copy satellite data from y to node - in this case there is no satellite data
 		}
+
 		if (y.getColor() == NodeColor.BLACK) {
 			deleteNodeFixup(z);
 		}
