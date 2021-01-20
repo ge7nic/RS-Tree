@@ -430,4 +430,11 @@ public class RedBlackTree<T extends Comparable<T>> {
 		return checkSubtree(node.getLeft(), noOfBlackNodes) && checkSubtree(node.getRight(), noOfBlackNodes);
 	}
 	
+	/**
+	 * Since Java Garbage Collector exists, the tree will delete itself.
+	 */
+	public void deleteTree() {
+		root = sentinel;
+	}
+	
 }

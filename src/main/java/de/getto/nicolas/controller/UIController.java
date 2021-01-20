@@ -74,9 +74,9 @@ public class UIController {
 			newAlert.showAndWait();
 		}
 	}
-
+	
 	@FXML
-	private void drawButtonClicked() {
-		
+	private void clearTreeButtonClicked() {
+		treePane.clearTree();
 	}
 }

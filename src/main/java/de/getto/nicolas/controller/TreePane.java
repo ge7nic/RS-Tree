@@ -35,8 +35,9 @@ public class TreePane extends Pane {
 	private FontMetrics fm = Toolkit.getToolkit().getFontLoader().getFontMetrics(font);
 	
 	private RedBlackTree<Integer> tree;
-	private int height;
 	private RBNode<Integer> insertNode;
+	private int height;
+	
 	private HBox controlPanel;
 	private TextField console;
 	
@@ -206,7 +207,12 @@ public class TreePane extends Pane {
 		} else {
 			searchWithoutAnimation(val);
 		}
-	}	
+	}
+	
+	public void clearTree() {
+		tree.deleteTree();
+		drawTree();
+	}
 	
 	/**============================================================================
 	 * HERE ARE THE METHODS THAT THE CONTROLLER-CALLED METHODS DELEGATE TO
