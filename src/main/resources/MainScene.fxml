@@ -44,9 +44,9 @@
                   <Insets />
                </HBox.margin>
                <children>
-                  <Button fx:id="clearTreeButton" mnemonicParsing="false" onAction="#clearTreeButtonClicked" prefHeight="25.0" prefWidth="90.0" text="Clear Tree" GridPane.halignment="LEFT" GridPane.rowIndex="1" GridPane.valignment="CENTER">
+                  <Button fx:id="clearTreeButton" alignment="CENTER" mnemonicParsing="false" onAction="#clearTreeButtonClicked" prefHeight="25.0" prefWidth="90.0" text="Clear Tree" GridPane.halignment="RIGHT" GridPane.rowIndex="1" GridPane.valignment="CENTER">
                      <GridPane.margin>
-                        <Insets left="15.0" />
+                        <Insets right="15.0" />
                      </GridPane.margin>
                   </Button>
                </children>

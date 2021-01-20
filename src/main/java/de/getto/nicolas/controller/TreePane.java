@@ -26,7 +26,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {5, 14};
+	private static final int[] STARTER_TREE = {7, 4, 11, 3, 6, 9, 18, 2, 14, 20, 12};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -209,6 +209,9 @@ public class TreePane extends Pane {
 		}
 	}
 	
+	/**
+	 * Clear the entire Tree at once by removing the root.
+	 */
 	public void clearTree() {
 		tree.deleteTree();
 		drawTree();
@@ -309,7 +312,11 @@ public class TreePane extends Pane {
 		setButtonDisableToValue(false);
 	}
 
-	// x is the node to be deleted
+	/**
+	 * Delete a node with explanatory animations.
+	 * @param val Node to delete
+	 * @param animationLength Animation time - this only affects pause transitions.
+	 */
 	private void deleteWithAnimation(int val, double animationLength) {
 		RBNode<Integer> tempNode = tree.findNode(val);
 		SequentialTransition seq = new SequentialTransition();
