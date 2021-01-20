@@ -670,10 +670,6 @@ public class TreePane extends Pane {
 				translate.setToX(((xMin + xMax) / 2) - c.getParent().getLayoutX());
 				translate.setToY((yMin + yMax / 2) - c.getParent().getLayoutY());
 				
-				translate.setOnFinished(e -> {
-					getChildren().remove(((Circle)lookup("#" + toSpliceOut.getKey())).getParent());
-				});
-				
 				seq.getChildren().addAll(fade, translate, pause);
 			}
 		} else if (toSpliceOut == toSpliceOut.getParent().getLeft()) {
@@ -709,8 +705,8 @@ public class TreePane extends Pane {
 			parallel.getChildren().addAll(fade, translate, fil);
 		}
 		
-		// If a subtree exists, we move it up
-		if (childOfToSpliceOut != tree.getSentinel()) {
+		// If a subtree exists, and we didn't already moved it to be the new root, we move it up
+		if (toSpliceOut.getParent() != tree.getSentinel() && childOfToSpliceOut != tree.getSentinel()) {
 			double[] childPos = findNodePosValues(childOfToSpliceOut.getKey());
 			RotationDirection dir = pastParent.getRight() == childOfToSpliceOut ? 
 					RotationDirection.LEFT : RotationDirection.RIGHT;
