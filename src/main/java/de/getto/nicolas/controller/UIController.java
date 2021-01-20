@@ -77,6 +77,6 @@ public class UIController {
 
 	@FXML
 	private void drawButtonClicked() {
-		treePane.dwdwda(36);
+		
 	}
 }
