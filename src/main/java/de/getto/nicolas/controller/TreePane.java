@@ -26,7 +26,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {15, 10, 20, 17, 25, 12, 36, 89, 102, 5, 14};
+	private static final int[] STARTER_TREE = {5, 14};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -685,6 +685,7 @@ public class TreePane extends Pane {
 		}
 		
 		parallel = new ParallelTransition();
+		pause = new PauseTransition(Duration.millis(10));
 		
 		// We replace the spliced out node and move it to it's correct place
 		if (toSpliceOut != tempNode) {
@@ -694,10 +695,18 @@ public class TreePane extends Pane {
 			translate.setToX(dest.getParent().getLayoutX() - c.getParent().getLayoutX());
 			translate.setToY(dest.getParent().getLayoutY() - c.getParent().getLayoutY());
 			
+			fade = new FadeTransition(Duration.millis(10), console);
+			final int valFromSplicedOutNode = tempNode.getKey();
+			fade.setOnFinished(e -> {
+				console.setText("We move " + toSpliceOut.getKey() + " to it's correct spot and recolor it to " +
+						valFromSplicedOutNode + "'s color.");
+			});
+			pause = new PauseTransition(Duration.seconds(animationLength));
+			
 			FillTransition fil = new FillTransition(Duration.millis(10), c,
 					(Color)c.getFill(), (Color)dest.getFill());
 			
-			parallel.getChildren().addAll(translate, fil);
+			parallel.getChildren().addAll(fade, translate, fil);
 		}
 		
 		// If a subtree exists, we move it up
@@ -711,7 +720,7 @@ public class TreePane extends Pane {
 
 		getChildren().remove(((Circle)lookup("#" + tempNode.getKey())).getParent());
 		
-		seq.getChildren().addAll(parallel);
+		seq.getChildren().addAll(parallel, pause);
 		
 		if (toSpliceOut != tempNode) {
 			tempNode.setKey(toSpliceOut.getKey());
@@ -723,6 +732,8 @@ public class TreePane extends Pane {
 			if (toSpliceOut.getColor() == NodeColor.BLACK) {
 				// repair here
 				animateDeleteFixup(childOfToSpliceOut, animationLength);
+			} else {
+				setButtonDisableToValue(false);
 			}
 		});
 
