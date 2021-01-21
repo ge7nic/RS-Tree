@@ -27,6 +27,7 @@ import javafx.util.Duration;
 public class TreePane extends Pane {
 	
 	private static final int[] STARTER_TREE = {7, 4, 11, 3, 6, 9, 18, 2, 14, 20, 12};
+	//private static final int[] STARTER_TREE = {50, 125, 15, 10, 13, 75, 11, 5};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -447,6 +448,7 @@ public class TreePane extends Pane {
 				// repair here
 				animateDeleteFixup(childOfToSpliceOut, animationLength);
 			} else {
+				// make buttons available again incase we don't need to repair the tree
 				setButtonDisableToValue(false);
 			}
 		});
@@ -818,9 +820,10 @@ public class TreePane extends Pane {
 						uncle = node.getParent().getRight();
 					}
 					// Left Subtree - Case 4
-					System.out.println("Left Subtree - Case 4");
 					final int val1 = uncle.getKey();
 					final int val2 = node.getParent().getKey();
+
+					System.out.println("Left Subtree - Case 4: " + val2 + ", " + val1 + ".");
 					par = new ParallelTransition();
 					fade = new FadeTransition(Duration.millis(10), console);
 					fade.setOnFinished(e -> {
@@ -1074,19 +1077,11 @@ public class TreePane extends Pane {
 		// go back up for subtrees
 		xMin = 2 * xMin - xMax;
 		yMin = yMin - yMax;
-
+		
 		// fix subtree alpha
 		// to fix alpha, we just move it down one level
 		if (node.getLeft() != tree.getSentinel()) {
 			par.getChildren().add(moveSubtreeDown(node.getLeft(), dir, xMin, (xMin + xMax) / 2, yMin + yMax, yMax));
-		}
-		// fix subtree beta
-		// to fix beta we move it to be the new right child of x and move it to that position
-		if (node.getRight().getLeft() != tree.getSentinel()) {
-			// Even though node.getRight().getLeft() is the node we are moving, we want the ending position to be
-			// at node.getLeft().getRight()
-			double dif = wayToMove(node.getRight().getLeft(), xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
-			par.getChildren().add(moveSubtreeSideways(node.getRight().getLeft(), dir, dif));
 		}
 		// fix subtree gamma
 		// to fix gamma all we have to do is move it up one level and set it as a child of the original node
@@ -1095,6 +1090,17 @@ public class TreePane extends Pane {
 			// go up one level again
 			par.getChildren().add(moveSubtreeUp(node.getRight().getRight(), dir, (xMin + xMax) / 2, xMax, yMin + yMax, yMax));
 
+		}
+		// fix subtree beta
+		// to fix beta we move it to be the new right child of x and move it to that position
+		if (node.getRight().getLeft() != tree.getSentinel()) {
+			// Go the the starting position of the beta subtree: since we start the root, we go once right and once left
+			xMin = (xMin + xMax) / 2;
+			yMin = yMin + yMax;
+			xMax = (xMin + xMax) / 2;
+			yMin = (yMin + yMax);
+			double dif = wayToMove(node.getRight().getLeft(), dir, xMin, xMax, yMin, yMax);
+			par.getChildren().add(moveSubtreeSideways(node.getRight().getLeft(), dir, dif));
 		}
 		return par;
 	}
@@ -1164,12 +1170,13 @@ public class TreePane extends Pane {
 		// fix subtree beta
 		// this also works symmetrically to left rotation
 		if (node.getLeft().getRight() != tree.getSentinel()) {
-			// Even though node.getLeft().getRight() is the node we are moving, we want the ending position to be
-			// at node.getRight().getLeft()
+			// We go to the starting pos of the beta subtree
 			xMax = (xMin + xMax) / 2;
 			yMin = yMin + yMax;
+			xMin = (xMin + xMax) / 2;
+			yMin = yMin + yMax;
 			// get dif between beta root and the destination
-			double dif = wayToMove(node.getLeft().getRight(), (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+			double dif = wayToMove(node.getLeft().getRight(), dir, xMin, xMax, yMin, yMax);
 			par.getChildren().add(moveSubtreeSideways(node.getLeft().getRight(), dir, dif));
 		}
 		
@@ -1193,11 +1200,7 @@ public class TreePane extends Pane {
 			Circle c = (Circle)lookup("#" + x.getKey());
 			TranslateTransition tt = new TranslateTransition(Duration.seconds(1), c.getParent());
 			
-			if (dir == RotationDirection.LEFT) {
-				tt.setByX(-distance);
-			} else {
-				tt.setByX(distance);
-			}
+			tt.setByX(distance);
 			par.getChildren().add(tt);
 		}
 		return par;
@@ -1291,19 +1294,35 @@ public class TreePane extends Pane {
 	/*
 	 * Finds the distance between two subtrees to move them sideways.
 	 */
-	private double wayToMove(RBNode<Integer> x, double xMin, double xMax, double yMin, double yMax) {
+	private double wayToMove(RBNode<Integer> x, RotationDirection dir, 
+			double xMin, double xMax, double yMin, double yMax) {
 		double originX = (xMin + xMax) / 2;
-		// go back up two nodes
-		xMin = 2 * xMin - xMax;
-		yMin = yMin - yMax;
-		xMax = 2 * xMax - xMin;
-		yMin = yMin - yMax;
-		//go right then left to be at the pos we want to be 
-		xMin = (xMin + xMax) / 2;
-		yMin = yMin + yMax;
-		xMax = (xMin + xMax) / 2;
-		yMin = yMin + yMax;
-		double destX = (xMin + xMax ) / 2;
+		double destX; 
+
+		if (dir == RotationDirection.LEFT) {
+			// go up twice, then left, then right to be where we want to be
+			xMax = 2 * xMax - xMin;
+			yMin = yMin - yMax;
+			xMin = 2 * xMin - xMax;
+			yMin = yMin - yMax;
+			
+			xMax = (xMin + xMax) / 2;
+			yMin = yMin + yMax;
+			xMin = (xMin + xMax) / 2;
+			yMin = yMin + yMax;
+		} else {
+			// go up twice, then right, then left to be where we want to be
+			xMin = 2 * xMin - xMax;
+			yMin = yMin - yMax;
+			xMax = 2 * xMax - xMin;
+			yMin = yMin - yMax;
+			
+			xMin = (xMin + xMax) / 2;
+			yMin = yMin + yMax;
+			xMax = (xMin + xMax) / 2;
+			yMin = yMin + yMax;
+		}
+		destX = (xMin + xMax) / 2;
 		
 		return destX - originX;
 	}
