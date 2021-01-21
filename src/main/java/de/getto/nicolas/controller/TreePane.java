@@ -308,12 +308,31 @@ public class TreePane extends Pane {
 		RBNode<Integer> tempRoot = tree.getRoot();
 		
 		SequentialTransition seq = new SequentialTransition();
+		FadeTransition fad;
+		StrokeTransition str;
+		PauseTransition pau;
 		
 		// create a new node
 		Group g = createNode(new Group(), insertNode);
 		
+		TranslateTransition tt = new TranslateTransition(Duration.seconds(1), g);
+		fad = new FadeTransition(Duration.millis(10), console);
+		fad.setOnFinished(e -> {
+			console.setText("First we look for the correct position by iterating through the tree.");
+		});
+		
+		double gStartX = 50;
+		double gStartY = yMax / 2;
+		g.setLayoutX(gStartX);
+		g.setLayoutY(gStartY);
+		
 		// find pos for new Node g
+		Circle c;
 		while (tempRoot != tree.getSentinel()) {
+			c = (Circle)lookup("#" + tempRoot.getKey());
+			str = new StrokeTransition(Duration.millis(10), c, (Color)c.getStroke(), HIGHLIGHT);
+			pau = new PauseTransition(Duration.seconds(1));
+			
 			if (insertNode.getKey() < tempRoot.getKey()) {
 				xMax = (xMin + xMax) / 2;
 				yMin = yMin + yMax;
@@ -325,11 +344,15 @@ public class TreePane extends Pane {
 				
 				tempRoot = tempRoot.getRight();
 			}
+			seq.getChildren().addAll(str, pau);
 		}
-		double gLayoutX = ((xMin + xMax) / 2);
-		double gLayoutY = yMin + yMax / 2;
-		g.setLayoutX(gLayoutX);
-		g.setLayoutY(gLayoutY);
+		double gEndX = (xMin + xMax) / 2;
+		double gEndY = yMin + yMax / 2;
+		tt.setByX(gEndX - gStartX);
+		tt.setByY(gEndY - gStartY );
+		pau = new PauseTransition(Duration.seconds(1));
+		
+		seq.getChildren().addAll(fad, tt, pau);
 		
 		// insert the node without fixing it so we can animate the fixing part
 		tree.insertNodeBU(insertNode, false);
@@ -846,11 +869,10 @@ public class TreePane extends Pane {
 		fade.setOnFinished(e -> {
 			console.setText("To finish, we just repaint the root black and paint the edges.");
 		});
-		pause = new PauseTransition(Duration.seconds(0.5));
 		
 		c = (Circle)lookup("#" + tree.getRoot().getKey());
 		fill = new FillTransition(Duration.millis(10), c, (Color)c.getFill(), Color.BLACK);
-		seq.getChildren().addAll(fade, pause, fill);
+		seq.getChildren().addAll(fade, fill);
 		tree.getRoot().setColor(NodeColor.BLACK);
 		
 		return seq;
