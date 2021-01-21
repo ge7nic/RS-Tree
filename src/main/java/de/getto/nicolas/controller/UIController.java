@@ -3,6 +3,7 @@ package de.getto.nicolas.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 
@@ -20,15 +21,19 @@ public class UIController {
 	private TextField console;
 	@FXML
 	private CheckBox animButton;
+	@FXML
+	private ChoiceBox choiceBoxTreeWalkType;
 	
 	private TreePane treePane;
 	
 	private static final int ANIMATION_LENGTH = 2;
+	private String treeWalkType;
 	
 	public void initialize() {
 		treePane = new TreePane(hBox, console);
 		
 		rootContainer.setCenter(treePane);
+		treeWalkType = "Preorder";
 	}
 
 	@FXML
@@ -73,6 +78,18 @@ public class UIController {
 			Alert newAlert = new Alert(Alert.AlertType.ERROR, input + " is not a valid number.");
 			newAlert.showAndWait();
 		}
+	}
+	
+	@FXML
+	private void treeWalkButtonClicked() {
+		treePane.treeWalk(treeWalkType, 1);
+	}
+	
+	@FXML
+	private void typeChanged() {
+		treeWalkType = choiceBoxTreeWalkType.getValue().toString();
+		System.out.println(treeWalkType);
+		
 	}
 	
 	@FXML

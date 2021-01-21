@@ -210,6 +210,32 @@ public class TreePane extends Pane {
 		}
 	}
 	
+	public void treeWalk(String treeWalkType, double animationLength) {
+		setButtonDisableToValue(true);
+		drawTree();
+		console.setText("");
+		
+		RBNode<Integer> node = tree.getRoot();
+		SequentialTransition seq = new SequentialTransition();
+		
+		switch(treeWalkType) {
+			case "Preorder":
+				animateTreeWalkPreOrder(node, seq, animationLength);
+				break;
+			case "Inorder":
+				animateTreeWalkInOrder(node, seq, animationLength);
+				break;
+			case "Postorder":
+				animateTreeWalkPostOrder(node, seq, animationLength);
+				break;
+		}
+		
+		seq.play();
+		seq.setOnFinished(e -> {
+			setButtonDisableToValue(false);
+		});
+	}
+	
 	/**
 	 * Clear the entire Tree at once by removing the root.
 	 */
@@ -536,6 +562,63 @@ public class TreePane extends Pane {
 		});
 	}
 	
+	private void animateTreeWalkPreOrder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
+		if (x != tree.getSentinel()) {
+			Circle c = (Circle)lookup("#" + x.getKey());
+			System.out.println(x.getKey());
+			
+			FadeTransition fad = new FadeTransition(Duration.millis(10), console);
+			fad.setOnFinished(e -> {
+				console.appendText(" " + x.getKey());
+			});
+			StrokeTransition str = new StrokeTransition(Duration.millis(10), c, (Color)c.getStroke(), HIGHLIGHT);
+			PauseTransition pau = new PauseTransition(Duration.seconds(animationLength));
+			
+			seq.getChildren().addAll(fad, str, pau);
+			
+			animateTreeWalkPreOrder(x.getLeft(), seq, animationLength);
+			animateTreeWalkPreOrder(x.getRight(), seq, animationLength);
+		}
+	}
+	
+	private void animateTreeWalkInOrder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
+		if (x != tree.getSentinel()) {
+			animateTreeWalkInOrder(x.getLeft(), seq, animationLength);
+
+			Circle c = (Circle)lookup("#" + x.getKey());
+			System.out.println(x.getKey());
+			
+			FadeTransition fad = new FadeTransition(Duration.millis(10), console);
+			fad.setOnFinished(e -> {
+				console.appendText(" " + x.getKey());
+			});
+			StrokeTransition str = new StrokeTransition(Duration.millis(10), c, (Color)c.getStroke(), HIGHLIGHT);
+			PauseTransition pau = new PauseTransition(Duration.seconds(animationLength));
+			
+			seq.getChildren().addAll(fad, str, pau);
+			
+			animateTreeWalkInOrder(x.getRight(), seq, animationLength);
+		}
+	}
+	
+	private void animateTreeWalkPostOrder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
+		if (x != tree.getSentinel()) {
+			animateTreeWalkPostOrder(x.getLeft(), seq, animationLength);
+			animateTreeWalkPostOrder(x.getRight(), seq, animationLength);
+			
+			Circle c = (Circle)lookup("#" + x.getKey());
+			System.out.println(x.getKey());
+			
+			FadeTransition fad = new FadeTransition(Duration.millis(10), console);
+			fad.setOnFinished(e -> {
+				console.appendText(" " + x.getKey());
+			});
+			StrokeTransition str = new StrokeTransition(Duration.millis(10), c, (Color)c.getStroke(), HIGHLIGHT);
+			PauseTransition pau = new PauseTransition(Duration.seconds(animationLength));
+			
+			seq.getChildren().addAll(fad, str, pau);
+		}
+	}
 	
 	/**============================================================================
 	 * HERE ARE HELPER METHODS

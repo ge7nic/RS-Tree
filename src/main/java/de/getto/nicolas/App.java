@@ -32,9 +32,9 @@ public class App extends Application {
 		Scene scene = new Scene(root);
 		
 		stage.setScene(scene);
+		stage.setTitle("RS-Tree Viewer");
 		
 		stage.show();
-		
 	} 
 	
 	public static void main(String[] args) {
