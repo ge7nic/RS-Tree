@@ -210,6 +210,11 @@ public class TreePane extends Pane {
 		}
 	}
 	
+	/**
+	 * Animates the Tree walk. This will always be animated.
+	 * @param treeWalkType A String that is either "Preorder", "Inorder" or "Postorder".
+	 * @param animationLength Animation Length.
+	 */
 	public void treeWalk(String treeWalkType, double animationLength) {
 		setButtonDisableToValue(true);
 		drawTree();
@@ -220,13 +225,13 @@ public class TreePane extends Pane {
 		
 		switch(treeWalkType) {
 			case "Preorder":
-				animateTreeWalkPreOrder(node, seq, animationLength);
+				animateTreeWalkPreorder(node, seq, animationLength);
 				break;
 			case "Inorder":
-				animateTreeWalkInOrder(node, seq, animationLength);
+				animateTreeWalkInorder(node, seq, animationLength);
 				break;
 			case "Postorder":
-				animateTreeWalkPostOrder(node, seq, animationLength);
+				animateTreeWalkPostorder(node, seq, animationLength);
 				break;
 		}
 		
@@ -562,7 +567,13 @@ public class TreePane extends Pane {
 		});
 	}
 	
-	private void animateTreeWalkPreOrder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
+	/**
+	 * Animated the TreeWalk in Preorder.
+	 * @param x current node.
+	 * @param seq sequential animation 
+	 * @param animationLength How long PauseTransition will take.
+	 */
+	private void animateTreeWalkPreorder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
 		if (x != tree.getSentinel()) {
 			Circle c = (Circle)lookup("#" + x.getKey());
 			System.out.println(x.getKey());
@@ -576,14 +587,20 @@ public class TreePane extends Pane {
 			
 			seq.getChildren().addAll(fad, str, pau);
 			
-			animateTreeWalkPreOrder(x.getLeft(), seq, animationLength);
-			animateTreeWalkPreOrder(x.getRight(), seq, animationLength);
+			animateTreeWalkPreorder(x.getLeft(), seq, animationLength);
+			animateTreeWalkPreorder(x.getRight(), seq, animationLength);
 		}
 	}
 	
-	private void animateTreeWalkInOrder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
+	/**
+	 * Animated the TreeWalk in Inorder.
+	 * @param x current node.
+	 * @param seq sequential animation 
+	 * @param animationLength How long PauseTransition will take.
+	 */
+	private void animateTreeWalkInorder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
 		if (x != tree.getSentinel()) {
-			animateTreeWalkInOrder(x.getLeft(), seq, animationLength);
+			animateTreeWalkInorder(x.getLeft(), seq, animationLength);
 
 			Circle c = (Circle)lookup("#" + x.getKey());
 			System.out.println(x.getKey());
@@ -597,14 +614,20 @@ public class TreePane extends Pane {
 			
 			seq.getChildren().addAll(fad, str, pau);
 			
-			animateTreeWalkInOrder(x.getRight(), seq, animationLength);
+			animateTreeWalkInorder(x.getRight(), seq, animationLength);
 		}
 	}
 	
-	private void animateTreeWalkPostOrder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
+	/**
+	 * Animated the TreeWalk in Postorder.
+	 * @param x current node.
+	 * @param seq sequential animation 
+	 * @param animationLength How long PauseTransition will take.
+	 */
+	private void animateTreeWalkPostorder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
 		if (x != tree.getSentinel()) {
-			animateTreeWalkPostOrder(x.getLeft(), seq, animationLength);
-			animateTreeWalkPostOrder(x.getRight(), seq, animationLength);
+			animateTreeWalkPostorder(x.getLeft(), seq, animationLength);
+			animateTreeWalkPostorder(x.getRight(), seq, animationLength);
 			
 			Circle c = (Circle)lookup("#" + x.getKey());
 			System.out.println(x.getKey());
