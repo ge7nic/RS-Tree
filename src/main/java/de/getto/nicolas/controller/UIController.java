@@ -22,7 +22,7 @@ public class UIController {
 	@FXML
 	private CheckBox animButton;
 	@FXML
-	private ChoiceBox choiceBoxTreeWalkType;
+	private ChoiceBox<String> choiceBoxTreeWalkType;
 	
 	private TreePane treePane;
 	
@@ -38,7 +38,7 @@ public class UIController {
 
 	@FXML
 	private void insertButtonClicked() {
-		String input = inputField.getText();
+		String input = retrieveInput();
 		
 		try {
 			int newVal = Integer.valueOf(input);
@@ -56,7 +56,7 @@ public class UIController {
 	
 	@FXML
 	private void deleteButtonClicked() {
-		String input = inputField.getText();
+		String input = retrieveInput();
 		
 		try {
 			int newVal = Integer.valueOf(input);
@@ -69,7 +69,7 @@ public class UIController {
 	
 	@FXML
 	private void searchButtonClicked() {
-		String input = inputField.getText();
+		String input = retrieveInput();
 		
 		try {
 			int newVal = Integer.valueOf(input);
@@ -95,5 +95,21 @@ public class UIController {
 	@FXML
 	private void clearTreeButtonClicked() {
 		treePane.clearTree();
+	}
+	
+	/**============================================================================
+	 * HERE ARE HELPER METHODS
+	 * ============================================================================
+	 */
+	
+	/**
+	 * Retrieving the input means saving it and then clearing the Input Field.
+	 * @return The User input as a String.
+	 */
+	private String retrieveInput() {
+		String res = inputField.getText();
+		inputField.clear();
+		
+		return res;
 	}
 }

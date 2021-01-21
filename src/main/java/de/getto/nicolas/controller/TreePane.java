@@ -216,27 +216,49 @@ public class TreePane extends Pane {
 	 * @param animationLength Animation Length.
 	 */
 	public void treeWalk(String treeWalkType, double animationLength) {
+		console.setStyle("-fx-text-fill: black");
 		setButtonDisableToValue(true);
 		drawTree();
 		console.setText("");
 		
 		RBNode<Integer> node = tree.getRoot();
 		SequentialTransition seq = new SequentialTransition();
+		FadeTransition fad = new FadeTransition(Duration.millis(10), console);
+		FadeTransition clear = new FadeTransition(Duration.millis(10), console);
+		PauseTransition pau = new PauseTransition(Duration.seconds(2));
 		
+		clear.setOnFinished(e -> {
+			console.setText("");
+		});
+		
+		seq.getChildren().addAll(fad, pau, clear);
 		switch(treeWalkType) {
 			case "Preorder":
+				fad.setOnFinished(e -> {
+					console.setText("In " + treeWalkType + " we first go down every left Subtree before going to the right.");
+				});
+
 				animateTreeWalkPreorder(node, seq, animationLength);
 				break;
 			case "Inorder":
+				fad.setOnFinished(e -> {
+					console.setText("In " + treeWalkType + " we go from the bottom of every left subtree to the right.");
+				});
+				
 				animateTreeWalkInorder(node, seq, animationLength);
 				break;
 			case "Postorder":
 				animateTreeWalkPostorder(node, seq, animationLength);
+				fad.setOnFinished(e -> {
+					console.setText("In " + treeWalkType + " we go from the lowest subtrees to the root.");
+				});
+				
 				break;
 		}
 		
 		seq.play();
 		seq.setOnFinished(e -> {
+			System.out.println("");
 			setButtonDisableToValue(false);
 		});
 	}
@@ -576,7 +598,7 @@ public class TreePane extends Pane {
 	private void animateTreeWalkPreorder(RBNode<Integer> x, SequentialTransition seq, double animationLength) {
 		if (x != tree.getSentinel()) {
 			Circle c = (Circle)lookup("#" + x.getKey());
-			System.out.println(x.getKey());
+			System.out.print(" " + x.getKey());
 			
 			FadeTransition fad = new FadeTransition(Duration.millis(10), console);
 			fad.setOnFinished(e -> {
@@ -603,7 +625,7 @@ public class TreePane extends Pane {
 			animateTreeWalkInorder(x.getLeft(), seq, animationLength);
 
 			Circle c = (Circle)lookup("#" + x.getKey());
-			System.out.println(x.getKey());
+			System.out.print(" " + x.getKey());
 			
 			FadeTransition fad = new FadeTransition(Duration.millis(10), console);
 			fad.setOnFinished(e -> {
@@ -630,7 +652,7 @@ public class TreePane extends Pane {
 			animateTreeWalkPostorder(x.getRight(), seq, animationLength);
 			
 			Circle c = (Circle)lookup("#" + x.getKey());
-			System.out.println(x.getKey());
+			System.out.print(" " + x.getKey());
 			
 			FadeTransition fad = new FadeTransition(Duration.millis(10), console);
 			fad.setOnFinished(e -> {
