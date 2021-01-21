@@ -27,7 +27,6 @@ import javafx.util.Duration;
 public class TreePane extends Pane {
 	
 	private static final int[] STARTER_TREE = {7, 4, 11, 3, 6, 9, 18, 2, 14, 20, 12};
-	//private static final int[] STARTER_TREE = {50, 125, 15, 10, 13, 75, 11, 5};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
