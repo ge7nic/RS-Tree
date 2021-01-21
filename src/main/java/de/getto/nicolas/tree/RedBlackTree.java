@@ -11,12 +11,6 @@ import de.getto.nicolas.util.SideViewPrinter;
  * 	-	Verify a Tree
  * 	-	Rotate Left 
  * 	-	Rotate Right
- * 	TODO:
- * 	-	Get Height
- * 	-	Get BlackHeight
- * 	-	Find a Node by value
- * 	-	Join two Trees
- * 	-	Split a Tree 
  * @author Nicolas Getto
  *
  * @param <T> The Value of the Tree. Every Tree can only hold one type of value.
