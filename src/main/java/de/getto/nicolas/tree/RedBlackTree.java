@@ -1,7 +1,6 @@
 package de.getto.nicolas.tree;
 
 import de.getto.nicolas.node.*;
-import de.getto.nicolas.util.SideViewPrinter;
 
 /**
  * Class that represents a RedBlackTree. It implements the following functions:
@@ -18,13 +17,11 @@ import de.getto.nicolas.util.SideViewPrinter;
 public class RedBlackTree<T extends Comparable<T>> {
 	private RBNode<T> root;
 	private RBNode<T> sentinel = RBNode.emptyNode();
-	private SideViewPrinter<T> printer;
 
 	private void setupSentinel() {
 		sentinel.setLeft(sentinel);
 		sentinel.setRight(sentinel);
 		sentinel.setColor(NodeColor.BLACK);
-		printer = new SideViewPrinter<>(sentinel);
 	}
 	
 	public RedBlackTree() {
@@ -373,10 +370,6 @@ public class RedBlackTree<T extends Comparable<T>> {
 		}
 		y.setRight(node);
 		node.setParent(y);
-	}
-	
-	public String sideViewPrint() {
-		return printer.print(root);
 	}
 	
 	public boolean contains(T val) {
