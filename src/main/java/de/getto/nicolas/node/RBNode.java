@@ -44,10 +44,6 @@ public class RBNode<T extends Comparable<T>> {
 	public RBNode<T> getParent() {
 		return parent;
 	}
-	
-	public boolean getIsHighlighted() {
-		return isHighlighted;
-	}
 
 	public void setColor(NodeColor color) {
 		this.color = color;
