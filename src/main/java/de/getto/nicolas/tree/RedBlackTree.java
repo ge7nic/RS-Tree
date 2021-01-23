@@ -2,18 +2,6 @@ package de.getto.nicolas.tree;
 
 import de.getto.nicolas.node.*;
 
-/**
- * Class that represents a RedBlackTree. It implements the following functions:
- * 	-	Insertion Bottom-Up
- * 	-	Delete a Node by Node
- * 	-	Delete a Node by Value
- * 	-	Verify a Tree
- * 	-	Rotate Left 
- * 	-	Rotate Right
- * @author Nicolas Getto
- *
- * @param <T> The Value of the Tree. Every Tree can only hold one type of value.
- */
 public class RedBlackTree<T extends Comparable<T>> {
 	private RBNode<T> root;
 	private RBNode<T> sentinel = RBNode.emptyNode();

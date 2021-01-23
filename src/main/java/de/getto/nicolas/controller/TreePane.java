@@ -26,7 +26,7 @@ import javafx.util.Duration;
 
 public class TreePane extends Pane {
 	
-	private static final int[] STARTER_TREE = {7, 4, 11, 3, 6, 9, 18, 2, 14, 20, 12};
+	private static final int[] STARTER_TREE = {35, 25, 45, 5, 30, 40, 80, 3, 10, 37, 90};
 	private static final int RADIUS = 26;
 	private static final Color NORMAL_BORDER = Color.rgb(169, 169, 169), HIGHLIGHT = Color.GOLD
 								, NORMAL_LINE = Color.rgb(90, 90, 90);
@@ -71,21 +71,6 @@ public class TreePane extends Pane {
 		}
 	}
 	
-	private void drawNodes(RBNode<Integer> node, RBNode<Integer> sentinel, double xMin, double xMax, double yMin, double yMax) {
-		Group group = createNode(new Group(), node);
-		
-		group.setLayoutX(((xMin + xMax) / 2));
-		group.setLayoutY(yMin + yMax / 2);
-		
-		getChildren().add(group);
-		if (node.getLeft() != sentinel) {
-			drawNodes(node.getLeft(), sentinel, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
-		} 
-		if (node.getRight() != sentinel) {
-			drawNodes(node.getRight(), sentinel, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
-		}
-	}
-	
 	private void drawLines(RBNode<Integer> node, RBNode<Integer> sentinel, double xMin, double xMax, double yMin, double yMax) {
 		Line edge;
 		
@@ -93,9 +78,9 @@ public class TreePane extends Pane {
 			edge = new Line();
 			edge.setStrokeWidth(4);
 			edge.setStroke(NORMAL_LINE);
-			edge.setStartX(((xMin + xMax) / 2));
+			edge.setStartX((xMin + xMax) / 2);
 			edge.setStartY(yMin + yMax / 2);
-			edge.setEndX(((xMin + (xMin + xMax) / 2) / 2));
+			edge.setEndX((xMin + (xMin + xMax) / 2) / 2);
 			edge.setEndY(yMin + yMax + yMax / 2);
 			edge.setId("edgeTo" + node.getLeft().getKey().toString());
 			
@@ -116,6 +101,21 @@ public class TreePane extends Pane {
 			getChildren().add(edge);
 			
 			drawLines(node.getRight(), sentinel, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
+		}
+	}
+	
+	private void drawNodes(RBNode<Integer> node, RBNode<Integer> sentinel, double xMin, double xMax, double yMin, double yMax) {
+		Group group = createNode(new Group(), node);
+		
+		group.setLayoutX(((xMin + xMax) / 2));
+		group.setLayoutY(yMin + yMax / 2);
+		
+		getChildren().add(group);
+		if (node.getLeft() != sentinel) {
+			drawNodes(node.getLeft(), sentinel, xMin, (xMin + xMax) / 2, yMin + yMax, yMax);
+		} 
+		if (node.getRight() != sentinel) {
+			drawNodes(node.getRight(), sentinel, (xMin + xMax) / 2, xMax, yMin + yMax, yMax);
 		}
 	}
 	
